@@ -3,6 +3,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 ARABIC=re.compile(r"[\u0600-\u06FF]")
 LATIN=re.compile(r"[A-Za-z]")
+DIACRITICS=re.compile(r"[\u064B-\u065F\u0670]")
 METADATA=ROOT/"demo/generated/metadata.json"
 
 class DemoScriptTests(unittest.TestCase):
@@ -15,7 +16,7 @@ class DemoScriptTests(unittest.TestCase):
         ids=[s["id"] for s in self.data["scenes"]]
         self.assertEqual(len(ids),len(set(ids)))
     def test_scene_fields_are_present(self):
-        required={"id","title","body","narration","caption","icon"}
+        required={"id","eyebrow","title","body","narration","caption","icon"}
         for scene in self.data["scenes"]:
             self.assertTrue(required.issubset(scene),scene["id"])
     def test_visible_copy_and_captions_are_arabic(self):
@@ -24,6 +25,14 @@ class DemoScriptTests(unittest.TestCase):
                 value=scene[field]
                 self.assertRegex(value,ARABIC,scene["id"]+":"+field)
                 self.assertIsNone(LATIN.search(value),"Unexpected Latin text: "+scene["id"]+":"+field)
+    def test_narration_and_captions_are_fully_vocalized(self):
+        for scene in self.data["scenes"]:
+            for field in ("narration","caption","title","body","eyebrow"):
+                words=re.findall(r"[\u0621-\u064A\u0671-\u0673]+",scene[field])
+                self.assertTrue(words,scene["id"]+":"+field)
+                missing=[word for word in words if not DIACRITICS.search(word)]
+                self.assertEqual(missing,[],scene["id"]+":"+field+" has unvocalized words")
+            self.assertEqual(scene["narration"],scene["caption"],scene["id"])
     def test_narration_is_nonempty_and_sentence_sized(self):
         for scene in self.data["scenes"]:
             self.assertGreater(len(scene["narration"].strip()),8)
@@ -34,8 +43,8 @@ class DemoScriptTests(unittest.TestCase):
         self.assertEqual(self.data["speechSpeed"],1.0)
     def test_script_has_social_hook_and_follow_call(self):
         combined=" ".join(s["narration"] for s in self.data["scenes"])
-        self.assertIn("هل الذكاء الاصطناعي",combined)
-        self.assertIn("تابع أبو محمد تك",combined)
+        self.assertIn("رَابِط",combined)
+        self.assertIn("أَبُو مُحَمَّد تِك",combined)
     @unittest.skipUnless(METADATA.exists(),"Generated audio is not present; run scripts/generate_demo.py first.")
     def test_one_continuous_audio_track_and_valid_word_timings(self):
         metadata=json.loads(METADATA.read_text(encoding="utf-8"))
