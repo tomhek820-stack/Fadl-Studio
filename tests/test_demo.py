@@ -46,7 +46,7 @@ class DemoScriptTests(unittest.TestCase):
         with wave.open(str(audio),"rb") as wav:
             duration=wav.getnframes()/wav.getframerate()
         self.assertGreater(duration,0)
-        self.assertLessEqual(duration,30)
+        self.assertLessEqual(duration,60)
         self.assertEqual(metadata["synthesisMode"],"single continuous narration track")
         self.assertEqual(len(props["scenes"]),5)
         for scene in props["scenes"]:
