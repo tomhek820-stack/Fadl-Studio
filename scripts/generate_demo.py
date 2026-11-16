@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "demo/scenes.json"
 GENERATED = ROOT / "demo/generated"
-AUDIO_DIR = GENERATED / "audio"
+AUDIO_DIR = ROOT / "public/audio"
 VOICE = "ar_JO-kareem-medium"
 BASE = "https://huggingface.co/rhasspy/piper-voices/resolve/main/ar/ar_JO/kareem/medium"
 MODEL_MD5 = "c0697df8a7fb180079cc5ac523f91a8e"
@@ -67,7 +67,7 @@ def main() -> None:
         else:
             duration = wav_duration(target)
         duration_frames = max(1, round(duration * 30) + 12)
-        output_scenes.append({**scene,"audio":"demo/generated/audio/"+scene["id"]+".wav",
+        output_scenes.append({**scene,"audio":"audio/"+scene["id"]+".wav",
             "audioDurationSeconds":round(duration,3),"durationInFrames":duration_frames,"startFrame":cursor})
         cursor += duration_frames
     props = {"title":config["title"],"scenes":output_scenes}
