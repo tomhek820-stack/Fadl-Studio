@@ -66,15 +66,22 @@ def main() -> None:
             stamp.write_text(fingerprint + "\n", encoding="utf-8")
         else:
             duration = wav_duration(target)
-        duration_frames = max(1, round(duration * 30) + 12)
+        audio_frames = max(1, round(duration * 30))
+        duration_frames = audio_frames + 12
         output_scenes.append({**scene,"audio":"audio/"+scene["id"]+".wav",
-            "audioDurationSeconds":round(duration,3),"durationInFrames":duration_frames,"startFrame":cursor})
+            "audioDurationSeconds":round(duration,3),"audioDurationFrames":audio_frames,
+            "durationInFrames":duration_frames,"startFrame":cursor})
         cursor += duration_frames
+    # Target 30 seconds; extend only the final visual hold if narration finishes early.
+    if cursor < 900:
+        output_scenes[-1]["durationInFrames"] += 900 - cursor
+        cursor = 900
     props = {"title":config["title"],"scenes":output_scenes}
     GENERATED.mkdir(parents=True,exist_ok=True)
     (GENERATED/"props.json").write_text(json.dumps(props,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     metadata = {"voice":VOICE,"totalFrames":cursor,"fps":30,"durationSeconds":round(cursor/30,3),
-      "scenes":[{"id":s["id"],"audioDurationSeconds":s["audioDurationSeconds"],"durationInFrames":s["durationInFrames"]} for s in output_scenes]}
+      "scenes":[{"id":s["id"],"audioDurationSeconds":s["audioDurationSeconds"],
+      "audioDurationFrames":s["audioDurationFrames"],"durationInFrames":s["durationInFrames"]} for s in output_scenes]}
     (GENERATED/"metadata.json").write_text(json.dumps(metadata,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print("Generated five WAV files; timeline: %.2fs" % (cursor/30))
 
