@@ -1,19 +1,19 @@
 # Fadl Studio
 
-خط إنتاج عربي لإنشاء فيديوهات قصيرة قابلة للنشر من فكرة أو نص، باستخدام Remotion وGoogle Gemini TTS أو Piper وFFmpeg.
+خط إنتاج عربي لإنشاء فيديوهات قصيرة قابلة للنشر من فكرة أو نص، باستخدام Remotion وMicrosoft Edge Neural TTS (مجاني) مع Piper كخيار احتياطي دون اتصال وFFmpeg.
 
 ## المتطلبات
 - Node.js 22 أو أحدث.
 - Python 3.11 أو أحدث.
 - FFmpeg وFFprobe.
 - اتصال إنترنت أثناء البناء لتنزيل الأدوات والنماذج.
-- اختياري للصوت الأعلى جودة: حساب Google Cloud مع Cloud Text-to-Speech وVertex AI API وحساب خدمة بصلاحية aiplatform.endpoints.predict.
+- اتصال إنترنت لتوليد الصوت عبر Edge Neural TTS؛ لا يحتاج مفتاح API أو حسابًا مدفوعًا. يعمل Piper كخيار احتياطي محلي.
 
 ## إنشاء فيديو المحتوى الاجتماعي
 
 ~~~bash
 npm install
-python3 -m pip install piper-tts==1.3.0
+python3 -m pip install edge-tts piper-tts==1.3.0
 python3 scripts/build_demo.py
 ~~~
 
