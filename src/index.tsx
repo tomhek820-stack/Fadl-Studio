@@ -5,9 +5,9 @@ import source from "../demo/scenes.json";
 
 const defaultProps: DemoProps = {
   title: source.title,
+  audio: "audio/narration.wav",
   scenes: source.scenes.map((scene) => ({
     ...scene,
-    audio: "audio/" + scene.id + ".wav",
     durationInFrames: 180,
     audioDurationFrames: 168,
     wordTimings: scene.caption.split(/\s+/).map((text,index,words) => ({
