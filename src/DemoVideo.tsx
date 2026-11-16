@@ -9,7 +9,8 @@ type Scene = {
   caption: string; icon: string; audio: string; durationInFrames: number; audioDurationFrames: number;
 };
 export type DemoProps = {title: string; scenes: Scene[]};
-const palette = ["#00D4FF", "#9B8CFF", "#35E0B2", "#FFB86B", "#65A7FF"];\nconst sceneNumbers = ["٠١", "٠٢", "٠٣", "٠٤", "٠٥"];
+const palette = ["#00D4FF", "#9B8CFF", "#35E0B2", "#FFB86B", "#65A7FF"];
+const sceneNumbers = ["٠١", "٠٢", "٠٣", "٠٤", "٠٥"];
 
 const Icon: React.FC<{name: string; color: string}> = ({name, color}) => {
   const common = {fill:"none",stroke:color,strokeWidth:7,strokeLinecap:"round" as const,strokeLinejoin:"round" as const};
