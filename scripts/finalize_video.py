@@ -20,13 +20,18 @@ def main():
     probe=json.loads(run(["ffprobe","-v","error","-show_entries",
       "format=duration:stream=codec_type,width,height","-of","json",str(output)]))
     streams=probe.get("streams",[])
-    if not any(s.get("codec_type")=="video" for s in streams):
+    video=next((s for s in streams if s.get("codec_type")=="video"),None)
+    audio=next((s for s in streams if s.get("codec_type")=="audio"),None)
+    if video is None:
         raise SystemExit("Final MP4 has no video stream")
-    if not any(s.get("codec_type")=="audio" for s in streams):
+    if audio is None:
         raise SystemExit("Final MP4 has no audio stream")
     if float(probe.get("format",{}).get("duration",0))<=0:
         raise SystemExit("Final MP4 has invalid duration")
-    print("Validated %s: %s seconds" % (output,probe["format"]["duration"]))
+    expected={"final_9x16.mp4":(1080,1920),"final_16x9.mp4":(1920,1080)}
+    if output.name in expected and (video.get("width"),video.get("height"))!=expected[output.name]:
+        raise SystemExit("Unexpected video dimensions: %sx%s" % (video.get("width"),video.get("height")))
+    print("Validated %s: %sx%s, %s seconds" % (output,video["width"],video["height"],probe["format"]["duration"]))
 
 if __name__=="__main__":
     main()
