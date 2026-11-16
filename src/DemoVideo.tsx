@@ -10,7 +10,7 @@ type Scene = {
   caption:string; icon:string; audio:string; durationInFrames:number;
   audioDurationFrames:number; wordTimings:WordTiming[];
 };
-export type DemoProps = {title:string; scenes:Scene[]};
+export type DemoProps = {title:string; audio:string; scenes:Scene[]};
 const palette=["#00D4FF","#9B8CFF","#35E0B2","#FFB86B","#65A7FF"];
 const sceneNumbers=["٠١","٠٢","٠٣","٠٤","٠٥"];
 
@@ -84,7 +84,7 @@ const SceneCard:React.FC<{scene:Scene;index:number;color:string}>=({scene,index,
   </div>;
 };
 
-export const DemoVideo:React.FC<DemoProps>=({scenes})=>{
+export const DemoVideo:React.FC<DemoProps>=({scenes,audio})=>{
   let from=0;
   return <div style={{width:"100%",height:"100%",background:"#05070D"}}>
     {scenes.map((scene,index)=>{
