@@ -28,7 +28,7 @@ class DemoScriptTests(unittest.TestCase):
     def test_narration_and_captions_are_fully_vocalized(self):
         for scene in self.data["scenes"]:
             for field in ("narration","caption","title","body","eyebrow"):
-                words=re.findall(r"[\u0621-\u064A\u0671-\u0673]+",scene[field])
+                words=re.findall(r"[\u0621-\u064A\u0671-\u0673][\u0621-\u064A\u0671-\u0673\u064B-\u065F\u0670]*",scene[field])
                 self.assertTrue(words,scene["id"]+":"+field)
                 missing=[word for word in words if not DIACRITICS.search(word)]
                 self.assertEqual(missing,[],scene["id"]+":"+field+" has unvocalized words")
