@@ -1,15 +1,59 @@
 # Fadl Studio
 
-Arabic-first video production pipeline built with Remotion, Piper TTS and FFmpeg.
+خط إنتاج عربي لإنتاج فيديوهات من النص أو الفكرة باستخدام Remotion وPiper TTS وFFmpeg.
 
-The repository is being initialized with an editable 30-second Arabic demo. See `AGENTS.md` for engineering and Arabic typography rules once the feature branch is available.
+## المتطلبات
+- Node.js 22 أو أحدث.
+- Python 3.11 أو أحدث.
+- FFmpeg وFFprobe.
+- اتصال إنترنت أول مرة لتنزيل نموذج الصوت العربي من Hugging Face.
 
-## Planned workflow
+## تشغيل الفيديو التجريبي
 
-1. Review and edit the Arabic scene script in `demo/scenes.json`.
-2. Generate per-scene narration locally with Piper using the Arabic Jordanian Kareem medium voice.
-3. Measure each WAV and create synchronized scene/caption metadata.
-4. Render vertical, landscape, square and portrait compositions with Remotion.
-5. Finalize MP4 files with FFmpeg.
+~~~bash
+npm install
+python3 -m pip install piper-tts==1.3.0
+python3 scripts/build_demo.py
+~~~
 
-No hosted speech API key is required. The voice model is downloaded on demand and is not committed to Git.
+تنتج العملية ملفي MP4:
+- demo/output/final_9x16.mp4 — عمودي 1080×1920.
+- demo/output/final_16x9.mp4 — أفقي 1920×1080.
+
+يُنشئ Piper ملفات WAV منفصلة للمشاهد، ويقيس مدتها الفعلية. يحسب Remotion طول كل مشهد من مدة الصوت، ثم يعرض الكابشن خلال المشهد نفسه. ينفذ FFmpeg الترميز النهائي إلى H.264/AAC ويتحقق FFprobe من وجود مساري الصوت والصورة.
+
+## تحرير السيناريو والنطق
+- حرر النصوص والتعليق الصوتي في demo/scenes.json.
+- راجع pronunciation.md للأسماء والمصطلحات.
+- استخدم صوتًا واحدًا لجميع المشاهد.
+- لا تُعدّل مدة المشهد يدويًا؛ يعاد حسابها من WAV الناتج.
+- ملفات الصوت المولدة تحفظ في public/audio/، وبيانات التوقيت في demo/generated/.
+
+## المقاسات
+تتوفر تركيبات Remotion التالية:
+- DemoVertical: 1080×1920 (9:16).
+- DemoLandscape: 1920×1080 (16:9).
+- DemoSquare: 1080×1080 (1:1).
+- DemoPortrait: 1080×1350 (4:5).
+
+تصدّر مهمة العرض التجريبي المقاسين العمودي والأفقي افتراضيًا.
+
+## الفحوص
+~~~bash
+npm run typecheck
+npm test
+python3 scripts/build_demo.py
+~~~
+
+GitHub Actions ينفذ الفحوص والتوليد والتصيير ويرفع MP4 وتقرير الجودة كـ Artifact لمدة 14 يومًا.
+
+## الصوت والتكلفة
+المسار الافتراضي محلي ومجاني ولا يحتاج مفتاح API. يستخدم نموذج Piper العربي Kareem medium (ar_JO). جودة النطق واللهجة أردنية، وقد تحتاج المصطلحات والأسماء إلى مراجعة بشرية. لا تُضمّن أوزان النموذج في Git؛ تُنزّل عند التشغيل ويجري التحقق من MD5.
+
+يمكن لاحقًا إضافة موفر TTS مستضاف كتكامل اختياري، لكن لا يُفعّل دون إعداد سرّ آمن وموافقة صريحة على التكلفة.
+
+## التراخيص
+راجع THIRD-PARTY-NOTICES.md. Remotion يعمل وفق شروط ترخيصه الخاصة، وFFmpeg قد يختلف ترخيص بنائه بحسب المكونات المفعّلة. بطاقة صوت Piper تشير إلى مصدر بيانات تدريب يحتاج ترخيصه إلى مراجعة مستقلة؛ لا تفترض أن ترخيص النموذج يغطي بيانات التدريب.
+
+## تعليمات الوكيل
+اقرأ AGENTS.md قبل أي تعديل على المشروع.
