@@ -33,7 +33,7 @@ const WordCaptions:React.FC<{scene:Scene;frame:number;landscape:boolean;color:st
     {scene.wordTimings.map((word,index)=>{
       const highlighted=index===active;
       return <span key={index} dir="rtl" style={{fontSize:landscape?27:37,lineHeight:1.7,fontWeight:800,
-        color:highlighted?"#07111D":"#F4F7FC",background:highlighted?color:"transparent",
+        color:highlighted?"#07111D":"#F4F7FC",background:highlighted?color:"transparent",opacity:index<=active?1:0,
         borderRadius:9,padding:highlighted?"0px 8px":"0px 2px",
         textShadow:highlighted?"none":"0 2px 10px #0008",transition:"none"}}>
         {word.text}
