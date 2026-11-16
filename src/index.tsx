@@ -7,8 +7,9 @@ const defaultProps: DemoProps = {
   title: source.title,
   scenes: source.scenes.map((scene) => ({
     ...scene,
-    audio: "demo/generated/audio/" + scene.id + ".wav",
+    audio: "audio/" + scene.id + ".wav",
     durationInFrames: 180,
+    audioDurationFrames: 168,
   })),
 };
 const getDuration = (props: DemoProps) =>
