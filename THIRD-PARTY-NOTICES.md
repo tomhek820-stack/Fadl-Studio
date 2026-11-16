@@ -7,4 +7,4 @@
 - **Noto Sans Arabic**: SIL Open Font License 1.1; see https://github.com/google/fonts/tree/main/ofl/notosansarabic.
 
 No third-party model weights or API credentials are committed to this repository.
-\n- **Google Cloud Text-to-Speech Chirp 3 HD** (optional): accessed through the Google Cloud Text-to-Speech API when GOOGLE_TTS_API_KEY is configured. Billing, API terms, and voice availability apply. The current demo uses ar-XA-Chirp3-HD-Charon; verify current Google Cloud terms before commercial distribution.\n
+\n- **Google Gemini TTS** (optional): Gemini 3.1 Flash TTS Preview is accessed through Google Cloud Text-to-Speech with service-account credentials. The current demo uses Arabic World (ar-001) and Charon with natural-delivery instructions. Preview availability, billing, API terms, and model-specific restrictions apply; verify current Google Cloud terms before commercial distribution.\n
