@@ -25,8 +25,8 @@ def main():
     metadata=json.loads((GEN/"metadata.json").read_text(encoding="utf-8"))
     details=json.loads((GEN/"props.json").read_text(encoding="utf-8"))["scenes"]
     scene_lines="\n".join(
-      "- {id}: {audio:.2f}s كلام، {words} كلمة".format(
-        id=s["id"],audio=s["audioDurationSeconds"],words=s["wordCount"])
+      "- {id}: {frames} إطارًا للكلام، {words} كلمة".format(
+        id=s["id"],frames=s["audioDurationFrames"],words=s["wordCount"])
       for s in metadata["scenes"])
     report=f"""# تقرير جودة فيديو المحتوى الاجتماعي
 
@@ -36,14 +36,16 @@ def main():
 ## مواصفات المحتوى
 - العنوان: {json.loads((ROOT/"demo/scenes.json").read_text(encoding="utf-8"))["title"]}
 - النوع: فيديو قصير بخطاف افتتاحي وفائدة عملية ودعوة للمتابعة.
-- الصوت: {metadata["voice"]}، سرعة التشغيل {metadata["speechSpeed"]:.0%} من السرعة الأصلية.
+- محرك الصوت: {metadata["voice"]}.
+- مدة مسار التعليق الصوتي المتصل: {metadata["audioDurationSeconds"]:.2f} ثانية؛ لا يوجد تسريع لاحق للصوت.
 - نمط الترجمة: إظهار تدريجي للكلمات مع تمييز الكلمة الحالية.
 - دقة التوقيت: تقدير موزون بطول الكلمات وعلامات الوقف نسبةً إلى مدة ملف WAV؛ ليست محاذاة صوتية على مستوى الفونيم، لذلك يلزم فحص بشري وضبط عند الحاجة.
 
 ## الأدوات
 - Remotion للمشاهد والحركة والترجمة المتحركة.
-- Piper TTS للصوت العربي المحلي.
-- FFmpeg لتسريع الصوت 8% مع المحافظة قدر الإمكان على طبقة الصوت، والترميز النهائي.
+- Google Cloud Chirp 3 HD عند توفر GOOGLE_TTS_API_KEY؛ وإلا Piper كخيار احتياطي.
+- توليد التعليق الصوتي كاملاً في مسار WAV واحد لتجنب قطع النبرة عند انتقال المشاهد.
+- FFmpeg لتوحيد معدل العينة والترميز النهائي، دون ضغط سرعة الكلام.
 - Noto Sans Arabic للخط.
 - FFprobe لفحص الصوت والصورة والأبعاد والمدة.
 
@@ -66,7 +68,8 @@ def main():
 ## ملاحظات الجودة والقيود
 - تقدير توقيت الكلمات موزع بحسب طول الكلمة وعلامات الترقيم، وليس ناتج محاذاة forced-alignment؛ قد تنحرف بعض الكلمات عن النطق الطبيعي.
 - يجب الاستماع إلى الصوت ومشاهدة المقطع كاملًا، خصوصًا توقيت الكلمات والأسماء والوقفات.
-- صوت Piper متوسط الجودة وبلهجة أردنية؛ راجع pronunciation.md.
+- Piper خيار احتياطي متوسط الجودة وبلهجة أردنية. للحصول على صوت Chirp 3 HD، أضف سر المستودع GOOGLE_TTS_API_KEY بعد تفعيل Cloud Text-to-Speech في Google Cloud.
+- توقيت الكلمات وحدود المشاهد موزع تقديريًا على مدة الصوت؛ ليس محاذاة فونيمية دقيقة.
 - راجع THIRD-PARTY-NOTICES.md قبل الاستخدام التجاري.
 
 ## إعادة التشغيل
