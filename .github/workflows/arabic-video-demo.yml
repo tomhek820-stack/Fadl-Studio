@@ -2,9 +2,10 @@ name: Arabic video pipeline
 on:
   push:
     branches: [main, "feature/**"]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
+concurrency:
+  group: arabic-video-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
