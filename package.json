@@ -1,0 +1,23 @@
+{
+  "name": "fadl-studio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Arabic-first AI video production pipeline",
+  "scripts": {
+    "studio": "remotion studio src/index.tsx",
+    "typecheck": "tsc --noEmit",
+    "test": "python3 -m unittest discover -s tests -v",
+    "build:demo": "python3 scripts/build_demo.py"
+  },
+  "dependencies": {
+    "@fontsource/noto-sans-arabic": "5.2.6",
+    "@remotion/cli": "4.0.534",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "remotion": "4.0.534"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.8",
+    "typescript": "5.8.3"
+  }
+}
