@@ -23,49 +23,59 @@ def main():
         run([sys.executable,"scripts/finalize_video.py",str(temp),str(final)])
         temp.unlink(missing_ok=True)
     metadata=json.loads((GEN/"metadata.json").read_text(encoding="utf-8"))
-    report="""# تقرير جودة الفيديو التجريبي
+    details=json.loads((GEN/"props.json").read_text(encoding="utf-8"))["scenes"]
+    scene_lines="\n".join(
+      "- {id}: {audio:.2f}s كلام، {words} كلمة".format(
+        id=s["id"],audio=s["audioDurationSeconds"],words=s["wordCount"])
+      for s in metadata["scenes"])
+    report=f"""# تقرير جودة فيديو المحتوى الاجتماعي
 
 ## الحالة
-اكتمل التوليد والبناء والتصدير آليًا. يلزم الاستماع والمراجعة البصرية البشرية قبل النشر.
+نجح توليد الصوت والتصيير والتصدير الآلي. يلزم الاستماع والمراجعة البصرية البشرية قبل النشر.
+
+## مواصفات المحتوى
+- العنوان: {json.loads((ROOT/"demo/scenes.json").read_text(encoding="utf-8"))["title"]}
+- النوع: فيديو قصير بخطاف افتتاحي وفائدة عملية ودعوة للمتابعة.
+- الصوت: {metadata["voice"]}، سرعة التشغيل {metadata["speechSpeed"]:.0%} من السرعة الأصلية.
+- نمط الترجمة: إظهار تدريجي للكلمات مع تمييز الكلمة الحالية.
+- دقة التوقيت: تقدير موزون بطول الكلمات وعلامات الوقف نسبةً إلى مدة ملف WAV؛ ليست محاذاة صوتية على مستوى الفونيم، لذلك يلزم فحص بشري وضبط عند الحاجة.
 
 ## الأدوات
-- Remotion 4.0.534 للمشاهد والحركة والنصوص والكابشن.
-- Piper TTS بالصوت العربي {voice} للتوليد المحلي دون مفتاح API.
-- FFmpeg لترميز H.264/AAC وتطبيع مستوى الصوت، وFFprobe للتحقق من الملف.
-- Noto Sans Arabic للعرض العربي.
+- Remotion للمشاهد والحركة والترجمة المتحركة.
+- Piper TTS للصوت العربي المحلي.
+- FFmpeg لتسريع الصوت 8% مع المحافظة قدر الإمكان على طبقة الصوت، والترميز النهائي.
+- Noto Sans Arabic للخط.
+- FFprobe لفحص الصوت والصورة والأبعاد والمدة.
 
-## الملفات
-- السيناريو: demo/scenes.json
-- بيانات الصوت والتوقيت: demo/generated/metadata.json
-- ملف الخصائص: demo/generated/props.json
-- الفيديو العمودي: demo/output/final_9x16.mp4
-- الفيديو الأفقي: demo/output/final_16x9.mp4
+## ملفات التصدير
+- demo/output/final_9x16.mp4 — 1080×1920.
+- demo/output/final_16x9.mp4 — 1920×1080.
 
-## المدة
-- المدة المحسوبة من ملفات WAV مع فاصل قصير بين المشاهد: {duration:.2f} ثانية.
-- تفاصيل المشاهد: {scenes}
+## مدة الفيديو
+- المدة الإجمالية: {metadata["durationSeconds"]:.2f} ثانية.
+- معدل الإطارات: 30 إطارًا في الثانية.
+- تفاصيل الصوت:
+{scene_lines}
 
-## جودة الصوت والمزامنة
-- الصوت: ملف WAV مستقل لكل مشهد، بصوت واحد ثابت.
-- التوقيت: محسوب من عدد إطارات WAV الفعلي؛ لا يجري قص الجمل لتناسب مدة ثابتة.
-- الكابشن: نص المشهد ظاهر خلال تسلسل الصوت نفسه.
-- يلزم الاستماع البشري للتأكد من جودة النطق والأسماء والوقفات.
+## الفحوص
+- TypeScript: يُشغّل قبل التصيير.
+- اختبارات Python: تتحقق من السيناريو وسرعة الصوت واستمرارية نطاقات توقيت الكلمات.
+- FFprobe: يتحقق من مساري الصوت والصورة ومدة موجبة وأبعاد التصدير.
+- الكابشن: كل كلمة تظهر عند بداية نافذتها الزمنية، وتُميّز الكلمة الحالية.
 
-## التحقق
-- اجتاز TypeScript وفحوص Python قبل التصيير.
-- اجتاز FFprobe التحقق من وجود مساري الفيديو والصوت ومدة موجبة لكل ملف نهائي.
-- راجع أبعاد كل ملف عبر ffprobe قبل النشر.
-
-## مشكلات وقيود متبقية
-- صوت Piper متوسط الجودة وبلهجة أردنية؛ قد يحتاج بعض المصطلحات والأسماء إلى ضبط في pronunciation.md.
-- ترخيص بيانات التدريب المشار إليها في بطاقة النموذج يحتاج مراجعة مستقلة قبل الاستخدام التجاري.
-- يجب مراجعة RTL بصريًا والاستماع إلى الفيديو النهائي على جهاز فعلي.
+## ملاحظات الجودة والقيود
+- تقدير توقيت الكلمات موزع بحسب طول الكلمة وعلامات الترقيم، وليس ناتج محاذاة forced-alignment؛ قد تنحرف بعض الكلمات عن النطق الطبيعي.
+- يجب الاستماع إلى الصوت ومشاهدة المقطع كاملًا، خصوصًا توقيت الكلمات والأسماء والوقفات.
+- صوت Piper متوسط الجودة وبلهجة أردنية؛ راجع pronunciation.md.
+- راجع THIRD-PARTY-NOTICES.md قبل الاستخدام التجاري.
 
 ## إعادة التشغيل
-1. ثبّت piper-tts==1.3.0.
-2. شغّل npm install.
-3. شغّل python3 scripts/build_demo.py.
-""".format(voice=metadata["voice"],duration=metadata["durationSeconds"],scenes=json.dumps(metadata["scenes"],ensure_ascii=False))
+~~~bash
+npm install
+python3 -m pip install piper-tts==1.3.0
+python3 scripts/build_demo.py
+~~~
+"""
     (ROOT/"demo/quality-report.md").write_text(report,encoding="utf-8")
     print("Build complete. See demo/quality-report.md")
 
