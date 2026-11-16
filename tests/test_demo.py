@@ -1,8 +1,9 @@
-import json, re, unittest
+import json, re, unittest, wave
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 ARABIC=re.compile(r"[\u0600-\u06FF]")
 LATIN=re.compile(r"[A-Za-z]")
+METADATA=ROOT/"demo/generated/metadata.json"
 
 class DemoScriptTests(unittest.TestCase):
     @classmethod
@@ -29,6 +30,19 @@ class DemoScriptTests(unittest.TestCase):
             self.assertLessEqual(len(scene["narration"]),180)
     def test_pronunciation_dictionary_exists(self):
         self.assertTrue((ROOT/"pronunciation.md").is_file())
+
+    @unittest.skipUnless(METADATA.exists(),"Generated audio is not present; run scripts/generate_demo.py first.")
+    def test_generated_wavs_and_timing_are_valid(self):
+        metadata=json.loads(METADATA.read_text(encoding="utf-8"))
+        self.assertEqual(metadata["durationSeconds"],30.0)
+        self.assertEqual(len(metadata["scenes"]),5)
+        for scene in metadata["scenes"]:
+            audio=ROOT/"public/audio"/(scene["id"]+".wav")
+            self.assertTrue(audio.is_file(),str(audio))
+            with wave.open(str(audio),"rb") as wav:
+                duration=wav.getnframes()/wav.getframerate()
+            self.assertGreater(duration,0)
+            self.assertGreaterEqual(scene["durationInFrames"],scene["audioDurationFrames"])
 
 if __name__=="__main__":
     unittest.main()
