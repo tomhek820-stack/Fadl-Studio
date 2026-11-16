@@ -58,7 +58,7 @@ const SceneCard:React.FC<{scene:Scene;index:number;color:string}>=({scene,index,
     <div style={{position:"absolute",inset:0,opacity:0.15,backgroundImage:"linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px)",backgroundSize:"72px 72px"}}/>
     <div style={{position:"absolute",width:"70%",height:"32%",top:"-12%",left:"15%",borderRadius:"50%",background:color,filter:"blur(120px)",opacity:0.2}}/>
     <div style={{zIndex:1,width:"100%",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-      <div style={{fontSize:landscape?25:30,fontWeight:800}}>فَضْل ستوديو</div>
+      <div style={{fontSize:landscape?25:30,fontWeight:800}}>أبو محمد تك</div>
       <div dir="ltr" style={{fontSize:landscape?20:24,color:"#9CAEC4"}}>{sceneNumbers[index]} / ٠٥</div>
     </div>
     <div style={{zIndex:1,width:"100%",display:"flex",flex:1,flexDirection:"column",alignItems:"center",
