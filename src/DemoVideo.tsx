@@ -7,7 +7,7 @@ import "@fontsource/noto-sans-arabic/800.css";
 type WordTiming = {text:string; startFrame:number; endFrame:number};
 type Scene = {
   id:string; eyebrow:string; title:string; body:string; narration:string;
-  caption:string; icon:string; audio:string; durationInFrames:number;
+  caption:string; icon:string; durationInFrames:number;
   audioDurationFrames:number; wordTimings:WordTiming[];
 };
 export type DemoProps = {title:string; audio:string; scenes:Scene[]};
@@ -87,11 +87,11 @@ const SceneCard:React.FC<{scene:Scene;index:number;color:string}>=({scene,index,
 export const DemoVideo:React.FC<DemoProps>=({scenes,audio})=>{
   let from=0;
   return <div style={{width:"100%",height:"100%",background:"#05070D"}}>
+    <Audio src={staticFile(audio)}/>
     {scenes.map((scene,index)=>{
       const start=from; from+=scene.durationInFrames;
       return <Sequence key={scene.id} from={start} durationInFrames={scene.durationInFrames}>
         <SceneCard scene={scene} index={index} color={palette[index%palette.length]}/>
-        <Audio src={staticFile(scene.audio)}/>
       </Sequence>;
     })}
   </div>;
