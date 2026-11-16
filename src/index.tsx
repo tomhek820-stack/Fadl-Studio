@@ -10,6 +10,11 @@ const defaultProps: DemoProps = {
     audio: "audio/" + scene.id + ".wav",
     durationInFrames: 180,
     audioDurationFrames: 168,
+    wordTimings: scene.caption.split(/\s+/).map((text,index,words) => ({
+      text,
+      startFrame: Math.floor(index * 168 / words.length),
+      endFrame: Math.floor((index + 1) * 168 / words.length),
+    })),
   })),
 };
 const getDuration = (props: DemoProps) =>
