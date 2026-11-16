@@ -35,7 +35,7 @@ class DemoScriptTests(unittest.TestCase):
     def test_script_has_social_hook_and_follow_call(self):
         combined=" ".join(s["narration"] for s in self.data["scenes"])
         self.assertIn("هل الذكاء الاصطناعي",combined)
-        self.assertIn("تابعنا",combined)
+        self.assertIn("تابع أبو محمد تك",combined)
     @unittest.skipUnless(METADATA.exists(),"Generated audio is not present; run scripts/generate_demo.py first.")
     def test_one_continuous_audio_track_and_valid_word_timings(self):
         metadata=json.loads(METADATA.read_text(encoding="utf-8"))
