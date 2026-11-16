@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate one continuous Arabic narration track and scene-relative word captions."""
 from __future__ import annotations
-import hashlib, json, os, re, shutil, subprocess
+import hashlib, json, os, re, shutil, subprocess, urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
