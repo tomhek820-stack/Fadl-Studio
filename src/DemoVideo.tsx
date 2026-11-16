@@ -41,7 +41,7 @@ const SceneCard: React.FC<{scene: Scene; index: number; color: string}> = ({scen
     <div style={{position:"absolute",width:"70%",height:"32%",top:"-12%",left:"15%",borderRadius:"50%",background:color,filter:"blur(120px)",opacity:0.2}}/>
     <div style={{zIndex:1,width:"100%",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
       <div style={{fontSize:isLandscape?25:30,fontWeight:800}}>فَضْل ستوديو</div>
-      <div style={{fontSize:isLandscape?20:24,color:"#9CAEC4"}}>{sceneNumbers[index]} / ٠٥</div>
+      <div dir="ltr" style={{fontSize:isLandscape?20:24,color:"#9CAEC4"}}>{sceneNumbers[index]} / ٠٥</div>
     </div>
     <div style={{zIndex:1,width:"100%",display:"flex",flex:1,flexDirection:"column",alignItems:"center",justifyContent:"center",gap:isLandscape?26:48,transform:"translateY("+translate+"px) scale("+scale+")",opacity:enter}}>
       <div style={{width:isLandscape?130:190,height:isLandscape?130:190,padding:28,borderRadius:42,boxSizing:"border-box",background:"rgba(255,255,255,.055)",border:"2px solid "+color+"66",boxShadow:"0 0 70px "+color+"22"}}>
