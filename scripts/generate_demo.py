@@ -100,8 +100,8 @@ def main() -> None:
     seconds=duration_seconds(audio)
     fps=int(data.get("fps",30))
     total_frames=max(1,round(seconds*fps))
-    if seconds > 30:
-        raise RuntimeError(f"Narration is {seconds:.1f}s; demo limit is 30s. Shorten the script.")
+    if seconds > 60:
+        raise RuntimeError(f"Narration is {seconds:.1f}s; video limit is 60s. Shorten the script.")
     scene_weights=[max(1,sum(weights_for(s["narration"]) for _ in [0])) for s in scenes]
     weight_total=sum(scene_weights)
     props_scenes=[]
