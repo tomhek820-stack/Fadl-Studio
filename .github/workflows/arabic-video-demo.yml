@@ -30,7 +30,18 @@ jobs:
         run: |
           npm install --no-audit --no-fund
           python -m pip install --upgrade pip
-          python -m pip install piper-tts==1.3.0
+          python -m pip install piper-tts==1.3.0 google-cloud-texttospeech==2.29.0
+      - name: Configure optional Google Gemini TTS credentials
+        env:
+          GOOGLE_TTS_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_TTS_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -n "$GOOGLE_TTS_SERVICE_ACCOUNT_JSON" ]; then
+            printf '%s' "$GOOGLE_TTS_SERVICE_ACCOUNT_JSON" > "$RUNNER_TEMP/gcp-tts.json"
+            echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/gcp-tts.json" >> "$GITHUB_ENV"
+            echo "Gemini TTS credentials configured."
+          else
+            echo "No Google TTS secret found; using continuous Piper fallback."
+          fi
       - name: Ensure Remotion browser
         run: npx remotion browser ensure
       - name: Build and export Arabic demo
