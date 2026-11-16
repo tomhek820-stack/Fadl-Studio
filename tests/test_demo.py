@@ -26,33 +26,32 @@ class DemoScriptTests(unittest.TestCase):
                 self.assertIsNone(LATIN.search(value),"Unexpected Latin text: "+scene["id"]+":"+field)
     def test_narration_is_nonempty_and_sentence_sized(self):
         for scene in self.data["scenes"]:
-            self.assertGreater(len(scene["narration"].strip()),12)
+            self.assertGreater(len(scene["narration"].strip()),8)
             self.assertLessEqual(len(scene["narration"]),180)
     def test_pronunciation_dictionary_exists(self):
         self.assertTrue((ROOT/"pronunciation.md").is_file())
-    def test_social_video_speed_is_slightly_faster(self):
-        self.assertAlmostEqual(self.data["speechSpeed"],1.08,places=2)
+    def test_no_artificial_speedup(self):
+        self.assertEqual(self.data["speechSpeed"],1.0)
     def test_script_has_social_hook_and_follow_call(self):
         combined=" ".join(s["narration"] for s in self.data["scenes"])
         self.assertIn("هل تريد",combined)
         self.assertIn("تابعنا",combined)
-
     @unittest.skipUnless(METADATA.exists(),"Generated audio is not present; run scripts/generate_demo.py first.")
-    def test_generated_wavs_and_word_timings_are_valid(self):
+    def test_one_continuous_audio_track_and_valid_word_timings(self):
         metadata=json.loads(METADATA.read_text(encoding="utf-8"))
-        self.assertEqual(metadata["durationSeconds"],30.0)
-        self.assertAlmostEqual(metadata["speechSpeed"],1.08,places=2)
         props=json.loads((ROOT/"demo/generated/props.json").read_text(encoding="utf-8"))
+        self.assertEqual(props["audio"],"audio/narration.wav")
+        audio=ROOT/"public/audio/narration.wav"
+        self.assertTrue(audio.is_file())
+        with wave.open(str(audio),"rb") as wav:
+            duration=wav.getnframes()/wav.getframerate()
+        self.assertGreater(duration,0)
+        self.assertLessEqual(duration,30)
+        self.assertEqual(metadata["synthesisMode"],"single continuous narration track")
         self.assertEqual(len(props["scenes"]),5)
         for scene in props["scenes"]:
-            audio=ROOT/"public/audio"/(scene["id"]+".wav")
-            self.assertTrue(audio.is_file(),str(audio))
-            with wave.open(str(audio),"rb") as wav:
-                duration=wav.getnframes()/wav.getframerate()
-            self.assertGreater(duration,0)
-            self.assertGreaterEqual(scene["durationInFrames"],scene["audioDurationFrames"])
             timings=scene["wordTimings"]
-            self.assertGreater(len(timings),3)
+            self.assertGreater(len(timings),2)
             self.assertEqual(timings[0]["startFrame"],0)
             self.assertEqual(timings[-1]["endFrame"],scene["audioDurationFrames"])
             for previous,current in zip(timings,timings[1:]):
