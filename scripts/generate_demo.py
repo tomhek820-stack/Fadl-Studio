@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Generate one continuous Arabic narration track with Edge TTS primary and Piper fallback."""
+"""Generate one continuous Arabic narration track: Edge Neural TTS primary, Piper fallback."""
 from __future__ import annotations
-import hashlib, json, os, re, shutil, subprocess, sys, urllib.request
+import asyncio, hashlib, json, os, re, shutil, subprocess, sys, time, urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -9,6 +9,8 @@ SOURCE = ROOT / "demo/scenes.json"
 GENERATED = ROOT / "demo/generated"
 AUDIO_DIR = ROOT / "public/audio"
 EDGE_VOICE = os.getenv("EDGE_TTS_VOICE", "ar-SA-HamedNeural")
+EDGE_RETRIES = max(1, int(os.getenv("EDGE_TTS_RETRIES", "3")))
+EDGE_TIMEOUT = max(30, int(os.getenv("EDGE_TTS_TIMEOUT_SECONDS", "180")))
 PIPER_VOICE = "ar_JO-kareem-medium"
 PIPER_BASE = "https://huggingface.co/rhasspy/piper-voices/resolve/main/ar/ar_JO/kareem/medium"
 MODEL_MD5 = "c0697df8a7fb180079cc5ac523f91a8e"
@@ -22,7 +24,7 @@ def download(url: str, destination: Path, expected_md5: str) -> None:
     if destination.exists() and hashlib.md5(destination.read_bytes()).hexdigest() == expected_md5:
         return
     destination.unlink(missing_ok=True)
-    request = urllib.request.Request(url, headers={"User-Agent": "Fadl-Studio/1.0"})
+    request = urllib.request.Request(url, headers={"User-Agent": "Fadl-Studio/2.0"})
     with urllib.request.urlopen(request, timeout=120) as response, destination.open("wb") as out:
         shutil.copyfileobj(response, out)
     if hashlib.md5(destination.read_bytes()).hexdigest() != expected_md5:
@@ -56,21 +58,35 @@ def word_timings(text: str, total_frames: int) -> list[dict]:
         cursor=end
     return result
 
-def synthesize_edge(text: str, target: Path) -> str:
-    """Free online Microsoft Edge neural speech; no API key or paid cloud account."""
+def synthesize_edge(text: str, target: Path) -> tuple[str, int]:
+    """Use Edge Neural TTS with bounded retries; fail over only after all attempts."""
     import edge_tts
-    import asyncio
-    async def generate():
-        communicate=edge_tts.Communicate(text, EDGE_VOICE, rate="+0%", volume="+0%", pitch="+0Hz")
-        await communicate.save(str(target.with_suffix(".mp3")))
-    asyncio.run(generate())
     mp3=target.with_suffix(".mp3")
-    if not mp3.is_file() or mp3.stat().st_size < 1024:
-        raise RuntimeError("Edge TTS returned an empty audio file")
-    subprocess.run(["ffmpeg","-y","-i",str(mp3),"-ar","24000","-ac","1","-c:a","pcm_s16le",str(target)],
-        check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
-    mp3.unlink(missing_ok=True)
-    return f"Microsoft Edge Neural TTS / {EDGE_VOICE} (free online)"
+    last_error: Exception | None = None
+    for attempt in range(1, EDGE_RETRIES + 1):
+        mp3.unlink(missing_ok=True)
+        target.unlink(missing_ok=True)
+        try:
+            async def generate():
+                communicate=edge_tts.Communicate(text, EDGE_VOICE, rate="+0%", volume="+0%", pitch="+0Hz")
+                await asyncio.wait_for(communicate.save(str(mp3)), timeout=EDGE_TIMEOUT)
+            asyncio.run(generate())
+            if not mp3.is_file() or mp3.stat().st_size < 1024:
+                raise RuntimeError("Edge TTS returned an empty or truncated audio file")
+            subprocess.run(["ffmpeg","-y","-v","error","-i",str(mp3),"-ar","24000","-ac","1",
+                "-c:a","pcm_s16le",str(target)],check=True)
+            if not target.is_file() or target.stat().st_size < 2048:
+                raise RuntimeError("Edge TTS WAV conversion failed")
+            mp3.unlink(missing_ok=True)
+            return f"Microsoft Edge Neural TTS / {EDGE_VOICE} (free online)", attempt
+        except Exception as exc:
+            last_error=exc
+            mp3.unlink(missing_ok=True)
+            target.unlink(missing_ok=True)
+            print(f"Edge TTS attempt {attempt}/{EDGE_RETRIES} failed: {exc}",file=sys.stderr,flush=True)
+            if attempt < EDGE_RETRIES:
+                time.sleep(min(2 ** (attempt - 1), 8))
+    raise RuntimeError(f"Edge TTS failed after {EDGE_RETRIES} attempts: {last_error}") from last_error
 
 def synthesize_piper(text: str, target: Path) -> str:
     """Offline fallback using the existing Arabic Kareem model."""
@@ -81,32 +97,35 @@ def synthesize_piper(text: str, target: Path) -> str:
     download(PIPER_BASE+"/"+PIPER_VOICE+".onnx.json",config,CONFIG_MD5)
     run([sys.executable,"-m","piper","--model",str(model),"--config",str(config),
          "--output_file",str(target)],input_text=text)
+    if not target.is_file() or target.stat().st_size < 2048:
+        raise RuntimeError("Piper returned an empty audio file")
     return "Piper / ar_JO-kareem-medium (offline fallback)"
 
 def main() -> None:
     data=json.loads(SOURCE.read_text(encoding="utf-8"))
     scenes=data["scenes"]
-    if not scenes:
-        raise RuntimeError("No scenes found")
+    if len(scenes) != 5:
+        raise RuntimeError("The current social-video composition requires exactly five scenes")
     narration=" ".join(scene["narration"].strip() for scene in scenes)
+    if not narration.strip():
+        raise RuntimeError("Narration is empty")
     GENERATED.mkdir(parents=True,exist_ok=True)
     AUDIO_DIR.mkdir(parents=True,exist_ok=True)
     audio=AUDIO_DIR/"narration.wav"
+    edge_attempts=0
     try:
-        voice=synthesize_edge(narration,audio)
+        voice,edge_attempts=synthesize_edge(narration,audio)
     except Exception as edge_error:
-        print(f"Edge TTS unavailable ({edge_error}); switching to Piper fallback.",file=sys.stderr)
+        print(f"Edge TTS unavailable after retries ({edge_error}); switching to Piper fallback.",file=sys.stderr,flush=True)
         voice=synthesize_piper(narration,audio)
     seconds=duration_seconds(audio)
     fps=int(data.get("fps",30))
     total_frames=max(1,round(seconds*fps))
     if seconds > 60:
         raise RuntimeError(f"Narration is {seconds:.1f}s; video limit is 60s. Shorten the script.")
-    scene_weights=[max(1,sum(weights_for(s["narration"]) for _ in [0])) for s in scenes]
+    scene_weights=[max(1,weights_for(s["narration"])) for s in scenes]
     weight_total=sum(scene_weights)
-    props_scenes=[]
-    metadata_scenes=[]
-    cursor=0
+    props_scenes=[]; metadata_scenes=[]; cursor=0
     for i,scene in enumerate(scenes):
         end=total_frames if i==len(scenes)-1 else max(cursor+1,round(total_frames*sum(scene_weights[:i+1])/weight_total))
         end=min(total_frames,end)
@@ -117,10 +136,10 @@ def main() -> None:
         cursor=end
     props={"title":data["title"],"audio":"audio/narration.wav","scenes":props_scenes}
     (GENERATED/"props.json").write_text(json.dumps(props,ensure_ascii=False,indent=2),encoding="utf-8")
-    metadata={"voice":voice,"audioDurationSeconds":seconds,"durationSeconds":seconds,
-        "synthesisMode":"single continuous narration track","scenes":metadata_scenes}
+    metadata={"voice":voice,"edgeAttempts":edge_attempts,"audioDurationSeconds":seconds,
+        "durationSeconds":seconds,"synthesisMode":"single continuous narration track","scenes":metadata_scenes}
     (GENERATED/"metadata.json").write_text(json.dumps(metadata,ensure_ascii=False,indent=2),encoding="utf-8")
-    print(f"Generated {audio} ({seconds:.2f}s) using {voice}")
+    print(f"Generated {audio} ({seconds:.2f}s) using {voice}; Edge attempts: {edge_attempts}")
 
 if __name__=="__main__":
     main()
