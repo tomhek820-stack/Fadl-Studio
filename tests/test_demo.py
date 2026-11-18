@@ -43,7 +43,7 @@ class DemoScriptTests(unittest.TestCase):
         self.assertEqual(self.data["speechSpeed"],1.0)
     def test_social_hook_and_follow_call(self):
         combined=" ".join(s["narration"] for s in self.data["scenes"])
-        self.assertIn("رَابِطٍ",combined)
+        self.assertIn("الرَّابِطَ المُشْتَبَهَ بِهِ",combined)
         self.assertIn("أَبُو مُحَمَّد تِك",combined)
     def test_edge_retry_and_fallback_are_documented_in_engine(self):
         engine=(ROOT/"scripts/generate_demo.py").read_text(encoding="utf-8")
