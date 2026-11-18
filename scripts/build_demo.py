@@ -12,7 +12,7 @@ def run(args):
 
 def main():
     OUT.mkdir(parents=True,exist_ok=True)
-    run([sys.executable,"scripts/generate_demo.py"])
+    run([sys.executable,"scripts/download_visual_assets.py"])\n    run([sys.executable,"scripts/generate_demo.py"])
     run(["npm","run","typecheck"])
     run(["npm","test"])
     for composition,temp,final in [
