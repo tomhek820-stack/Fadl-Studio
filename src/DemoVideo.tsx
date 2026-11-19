@@ -60,7 +60,9 @@ const SceneCard:React.FC<{scene:Scene;index:number;color:string}>=({scene,index,
     color:"#F4F7FC",fontFamily:"'Noto Sans Arabic', sans-serif",display:"flex",flexDirection:"column",
     alignItems:"center",justifyContent:landscape?"center":"space-between",
     padding:landscape?"7% 10%":"10% 8%",boxSizing:"border-box",direction:"rtl"}}>
-    <Img src={staticFile("icons/hexagon.svg")} style={{position:"absolute",width:"34%",height:"34%",right:"-8%",top:"17%",opacity:0.08}}/>\n    <Img src={staticFile("icons/orbit.svg")} style={{position:"absolute",width:"30%",height:"30%",left:"-8%",bottom:"18%",opacity:0.07}}/>\n    <div style={{position:"absolute",inset:0,opacity:0.15,backgroundImage:"linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px)",backgroundSize:"72px 72px"}}/>
+    <Img src={staticFile("icons/hexagon.svg")} style={{position:"absolute",width:"34%",height:"34%",right:"-8%",top:"17%",opacity:0.08}}/>
+    <Img src={staticFile("icons/orbit.svg")} style={{position:"absolute",width:"30%",height:"30%",left:"-8%",bottom:"18%",opacity:0.07}}/>
+    <div style={{position:"absolute",inset:0,opacity:0.15,backgroundImage:"linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px)",backgroundSize:"72px 72px"}}/>
     <div style={{position:"absolute",width:"70%",height:"32%",top:"-12%",left:"15%",borderRadius:"50%",background:color,filter:"blur(120px)",opacity:0.2}}/>
     <div style={{zIndex:1,width:"100%",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
       <div style={{fontSize:landscape?25:30,fontWeight:800}}>أبو محمد تك</div>
