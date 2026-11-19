@@ -14,9 +14,9 @@ class DemoScriptTests(unittest.TestCase):
         build=(ROOT/"scripts/build_demo.py").read_text(encoding="utf-8")
         video=(ROOT/"src/DemoVideo.tsx").read_text(encoding="utf-8")
         readme=(ROOT/"README.md").read_text(encoding="utf-8")
-        self.assertNotRegex(build,r"\\\\n\\s+run\\(")
-        self.assertNotRegex(video,r"\\\\n\\s*<")
-        self.assertNotIn("\\\\n-",readme)
+        self.assertNotRegex(build,r"\\n\\s+run\\(")
+        self.assertNotRegex(video,r"\\n\\s*<")
+        self.assertNotIn(r"\\n-",readme)
 
     def test_exactly_five_scenes(self):
         self.assertEqual(len(self.data["scenes"]),5)
