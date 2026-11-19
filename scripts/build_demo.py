@@ -10,7 +10,26 @@ def run(args):
     print("+"," ".join(args),flush=True)
     subprocess.run(args,cwd=ROOT,check=True)
 
+def validate_source():
+    source=json.loads((ROOT/"demo/scenes.json").read_text(encoding="utf-8"))
+    scenes=source.get("scenes",[])
+    if len(scenes) != 5:
+        raise RuntimeError("Expected exactly five scenes")
+    if source.get("speechSpeed") != 1:
+        raise RuntimeError("Speech speed must remain 1.0; artificial speed-up is forbidden")
+    required={"id","eyebrow","title","body","narration","caption","icon"}
+    for index,scene in enumerate(scenes,1):
+        missing=required-set(scene)
+        if missing:
+            raise RuntimeError(f"Scene {index} is missing fields: {sorted(missing)}")
+        if not scene["narration"].strip() or scene["narration"] != scene["caption"]:
+            raise RuntimeError(f"Scene {index} narration/caption mismatch or empty narration")
+        if len(scene["narration"]) > 180:
+            raise RuntimeError(f"Scene {index} narration exceeds 180 characters")
+    print("Source preflight passed: five scenes, matching captions, normal speech speed.")
+
 def main():
+    validate_source()
     OUT.mkdir(parents=True,exist_ok=True)
     run([sys.executable,"scripts/download_visual_assets.py"])
     run([sys.executable,"scripts/generate_demo.py"])
