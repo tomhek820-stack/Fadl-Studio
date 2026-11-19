@@ -10,6 +10,14 @@ class DemoScriptTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.data=json.loads((ROOT/"demo/scenes.json").read_text(encoding="utf-8"))
+    def test_no_literal_escaped_newline_corruption(self):
+        build=(ROOT/"scripts/build_demo.py").read_text(encoding="utf-8")
+        video=(ROOT/"src/DemoVideo.tsx").read_text(encoding="utf-8")
+        readme=(ROOT/"README.md").read_text(encoding="utf-8")
+        self.assertNotRegex(build,r"\\\\n\\s+run\\(")
+        self.assertNotRegex(video,r"\\\\n\\s*<")
+        self.assertNotIn("\\\\n-",readme)
+
     def test_exactly_five_scenes(self):
         self.assertEqual(len(self.data["scenes"]),5)
     def test_scene_ids_are_unique(self):
@@ -43,7 +51,7 @@ class DemoScriptTests(unittest.TestCase):
         self.assertEqual(self.data["speechSpeed"],1.0)
     def test_social_hook_and_follow_call(self):
         combined=" ".join(s["narration"] for s in self.data["scenes"])
-        self.assertIn("هَاتِفُكَ يَحْمِلُ",combined)
+        self.assertIn("هَلْ يُصْبِحُ هَاتِفُكَ",combined)
         self.assertIn("أَبُو مُحَمَّد تِك",combined)
     def test_edge_retry_and_fallback_are_documented_in_engine(self):
         engine=(ROOT/"scripts/generate_demo.py").read_text(encoding="utf-8")
