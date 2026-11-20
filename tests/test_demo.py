@@ -65,8 +65,8 @@ class DemoScriptTests(unittest.TestCase):
         combined=" ".join(s["narration"] for s in self.data["scenes"])
         self.assertIn("هَلْ تَعْرِفُ مَنْ",combined)
         self.assertIn("أَبُو مُحَمَّد تِكْ",combined)
-        self.assertNotRegex(combined,r"أَبُو مُحَمَّد[.،؛…]+\\s*تِكْ")
-        self.assertNotRegex(combined,r"أَبُو مُحَمَّد\\s{2,}تِكْ")
+        self.assertNotRegex(combined,r"أَبُو مُحَمَّد[.،؛…]+\s*تِكْ")
+        self.assertNotRegex(combined,r"أَبُو مُحَمَّد\s{2,}تِكْ")
         self.assertNotIn("خَمْسُ عَادَاتٍ لِهَاتِفٍ أَسْرَعَ",combined)
     def test_edge_retry_and_fallback_are_documented_in_engine(self):
         engine=(ROOT/"scripts/generate_demo.py").read_text(encoding="utf-8")
