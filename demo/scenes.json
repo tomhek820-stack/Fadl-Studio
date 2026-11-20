@@ -17,7 +17,40 @@
       "visual": {
         "background": "linear-gradient(140deg,#170A12 0%,#4B1730 48%,#09070D 100%)",
         "accent": "#FF5577",
-        "motif": "rings"
+        "motif": "rings",
+        "subject": {
+          "label": "الهاتف والكاميرا",
+          "icon": "smartphone",
+          "detail": "جهازك وبياناتك وصلاحيات الوصول",
+          "elements": [
+            {
+              "label": "الكاميرا",
+              "icon": "camera"
+            },
+            {
+              "label": "الموقع",
+              "icon": "map"
+            },
+            {
+              "label": "الحماية",
+              "icon": "shield"
+            }
+          ]
+        },
+        "elements": [
+          {
+            "label": "الكاميرا",
+            "icon": "camera"
+          },
+          {
+            "label": "الموقع",
+            "icon": "map"
+          },
+          {
+            "label": "الحماية",
+            "icon": "shield"
+          }
+        ]
       }
     },
     {
@@ -31,7 +64,32 @@
       "visual": {
         "background": "linear-gradient(135deg,#071B2B 0%,#104A65 52%,#050B13 100%)",
         "accent": "#54C8FF",
-        "motif": "dots"
+        "motif": "dots",
+        "subject": {
+          "label": "تطبيق الهاتف",
+          "icon": "app-window",
+          "detail": "راجع ما يطلبه التطبيق قبل الموافقة",
+          "elements": [
+            {
+              "label": "المصباح",
+              "icon": "flashlight"
+            },
+            {
+              "label": "جهات الاتصال",
+              "icon": "contact-round"
+            }
+          ]
+        },
+        "elements": [
+          {
+            "label": "المصباح",
+            "icon": "flashlight"
+          },
+          {
+            "label": "جهات الاتصال",
+            "icon": "contact-round"
+          }
+        ]
       }
     },
     {
@@ -45,7 +103,32 @@
       "visual": {
         "background": "linear-gradient(145deg,#17102D 0%,#3C2870 50%,#090713 100%)",
         "accent": "#B99AFF",
-        "motif": "diagonal"
+        "motif": "diagonal",
+        "subject": {
+          "label": "الكاميرا والميكروفون",
+          "icon": "camera",
+          "detail": "تحكم في الوصول إلى الصوت والصورة",
+          "elements": [
+            {
+              "label": "الميكروفون",
+              "icon": "mic"
+            },
+            {
+              "label": "الإعدادات",
+              "icon": "settings"
+            }
+          ]
+        },
+        "elements": [
+          {
+            "label": "الميكروفون",
+            "icon": "mic"
+          },
+          {
+            "label": "الإعدادات",
+            "icon": "settings"
+          }
+        ]
       }
     },
     {
@@ -59,7 +142,32 @@
       "visual": {
         "background": "linear-gradient(135deg,#10251C 0%,#28583D 52%,#07100B 100%)",
         "accent": "#8BE0A5",
-        "motif": "circuit"
+        "motif": "circuit",
+        "subject": {
+          "label": "موقعك الجغرافي",
+          "icon": "map",
+          "detail": "شارك موقعك مع التطبيقات التي تحتاجه فقط",
+          "elements": [
+            {
+              "label": "الهاتف",
+              "icon": "smartphone"
+            },
+            {
+              "label": "الحماية",
+              "icon": "shield"
+            }
+          ]
+        },
+        "elements": [
+          {
+            "label": "الهاتف",
+            "icon": "smartphone"
+          },
+          {
+            "label": "الحماية",
+            "icon": "shield"
+          }
+        ]
       }
     },
     {
@@ -73,7 +181,32 @@
       "visual": {
         "background": "linear-gradient(145deg,#2B1B08 0%,#70501C 50%,#100B05 100%)",
         "accent": "#FFD166",
-        "motif": "grid"
+        "motif": "grid",
+        "subject": {
+          "label": "إعدادات الخصوصية",
+          "icon": "settings",
+          "detail": "راجع الصلاحيات وأوقف غير الضروري",
+          "elements": [
+            {
+              "label": "قفل الحماية",
+              "icon": "lock"
+            },
+            {
+              "label": "المراجعة",
+              "icon": "refresh-cw"
+            }
+          ]
+        },
+        "elements": [
+          {
+            "label": "قفل الحماية",
+            "icon": "lock"
+          },
+          {
+            "label": "المراجعة",
+            "icon": "refresh-cw"
+          }
+        ]
       }
     }
   ]
