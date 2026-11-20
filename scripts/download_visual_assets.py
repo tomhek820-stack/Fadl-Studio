@@ -11,7 +11,7 @@ BASE = "https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/"
 ASSETS = [
     "shield-check", "refresh-cw", "sliders-horizontal", "lock-keyhole",
     "cloud-upload", "sparkles", "file-text", "audio-lines", "captions",
-    "upload", "shapes", "hexagon", "orbit",
+    "upload", "shapes", "hexagon", "orbit", "hard-drive", "app-window", "trash-2",
 ]
 
 def fetch(name: str) -> None:
