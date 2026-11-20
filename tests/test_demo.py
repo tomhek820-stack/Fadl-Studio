@@ -53,8 +53,9 @@ class DemoScriptTests(unittest.TestCase):
         self.assertTrue(self.data.get("visualIdentity"))
         scenes=self.data["scenes"]
         self.assertEqual(len({s["icon"] for s in scenes}),len(scenes))
-        signatures={(s["visual"]["background"],s["visual"]["accent"],s["visual"]["motif"]) for s in scenes}
-        self.assertEqual(len(signatures),len(scenes))
+        self.assertEqual(len({s["visual"]["background"] for s in scenes}),len(scenes))
+        self.assertEqual(len({s["visual"]["accent"] for s in scenes}),len(scenes))
+        self.assertEqual(len({s["visual"]["motif"] for s in scenes}),len(scenes))
         allowed={"grid","dots","diagonal","rings","circuit"}
         for scene in scenes:
             visual=scene["visual"]
