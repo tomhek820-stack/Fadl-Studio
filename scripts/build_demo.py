@@ -30,6 +30,15 @@ def validate_source():
         if len(scene["narration"]) > 180:
             raise RuntimeError(f"Scene {index} narration exceeds 180 characters")
         visual=scene["visual"]
+        subject=visual.get("subject")
+        if not isinstance(subject,dict):
+            raise RuntimeError(f"Scene {index} is missing visual.subject")
+        elements=visual.get("elements",[])
+        if not isinstance(elements,list) or len(elements)>3:
+            raise RuntimeError(f"Scene {index} must have at most three visual.elements")
+        validate_visual_item(subject,scene["id"],"visual.subject")
+        for element in elements:
+            validate_visual_item(element,scene["id"],"visual.elements item")
         if not all(visual.get(key) for key in ("background","accent","motif")):
             raise RuntimeError(f"Scene {index} is missing its visual direction")
         if visual["motif"] not in {"grid","dots","diagonal","rings","circuit"}:
@@ -46,6 +55,26 @@ def validate_source():
     if len({s["icon"] for s in scenes}) != len(scenes):
         raise RuntimeError("Scene icons must be unique within a video")
     print("Source preflight passed: five scenes, matching captions, normal speech speed, unique scene art direction.")
+
+def validate_visual_item(item, scene_id, kind):
+    import re
+    if not isinstance(item, dict):
+        raise RuntimeError(f"{scene_id} {kind} must be an object")
+    if not isinstance(item.get("label"), str) or not item["label"].strip():
+        raise RuntimeError(f"{scene_id} {kind} is missing its label")
+    icon=item.get("icon")
+    if not isinstance(icon, str) or not re.fullmatch(r"[a-z0-9-]+", icon):
+        raise RuntimeError(f"{scene_id} {kind} has an invalid icon name")
+    image=item.get("image")
+    if image:
+        relative=Path(image)
+        public=(ROOT/"public").resolve()
+        candidate=(public/relative).resolve()
+        if relative.is_absolute() or ".." in relative.parts or not candidate.is_relative_to(public):
+            raise RuntimeError(f"{scene_id} {kind} image must stay inside public/")
+        if not candidate.is_file():
+            raise RuntimeError(f"{scene_id} {kind} image does not exist: {image}")
+
 
 def main():
     validate_source()
