@@ -27,6 +27,13 @@ Build a reliable Arabic-first video production pipeline that turns an Arabic ide
 - Produce social-first hooks, clear value and a concise call to action when the brief is for social publishing.
 - Include captions synchronized to measured speech timing.
 
+## Semantic visual storytelling
+- Every scene must visually depict its actual subject, regardless of category; do not limit this to AI tools.
+- Define `visual.subject` with an Arabic label and a semantically matching icon, plus up to three directly relevant `visual.elements`.
+- Prefer verified, properly licensed real imagery or genuine product/app interfaces; then official logos/icons; then custom explanatory illustrations; use Lucide icons as fallback.
+- Keep imagery synchronized with narration and make the main subject prominent. Decorative backgrounds never substitute for the thing being explained.
+- Validate all referenced local image paths and download/validate every referenced icon before rendering.
+
 ## Security and licensing
 - Never commit API keys, credentials or access tokens.
 - Use environment variables or GitHub Secrets for optional hosted services.
