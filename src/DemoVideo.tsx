@@ -7,11 +7,10 @@ import "@fontsource/noto-sans-arabic/800.css";
 type WordTiming = {text:string; startFrame:number; endFrame:number};
 type Scene = {
   id:string; eyebrow:string; title:string; body:string; narration:string;
-  caption:string; icon:string; durationInFrames:number;
+  caption:string; icon:string; visual:{background:string;accent:string;motif:string}; durationInFrames:number;
   audioDurationFrames:number; wordTimings:WordTiming[];
 };
 export type DemoProps = {title:string; audio:string; scenes:Scene[]};
-const palette=["#00D4FF","#9B8CFF","#35E0B2","#FFB86B","#65A7FF"];
 const sceneNumbers=["٠١","٠٢","٠٣","٠٤","٠٥"];
 
 const iconFiles:Record<string,string>={
@@ -25,7 +24,23 @@ const iconFiles:Record<string,string>={
   audio:"audio-lines",
   captions:"captions",
   export:"upload",
+  "hard-drive":"hard-drive",
+  "app-window":"app-window",
+  "trash-2":"trash-2",
 };
+const motifStyle=(motif:string,color:string):React.CSSProperties=>{
+  const soft=color+"24";
+  const patterns:Record<string,string>={
+    grid:`linear-gradient(${soft} 1px, transparent 1px),linear-gradient(90deg,${soft} 1px,transparent 1px)`,
+    dots:`radial-gradient(${soft} 1.6px,transparent 1.6px)`,
+    diagonal:`repeating-linear-gradient(135deg,${soft} 0 1px,transparent 1px 24px)`,
+    rings:`repeating-radial-gradient(circle at 50% 50%,${soft} 0 1px,transparent 1px 34px)`,
+    circuit:`linear-gradient(${soft} 1px,transparent 1px),linear-gradient(90deg,${soft} 1px,transparent 1px),radial-gradient(circle at 25% 25%,${soft} 0 3px,transparent 4px)`,
+  };
+  return {position:"absolute",inset:0,opacity:0.8,backgroundImage:patterns[motif]??patterns.grid,
+    backgroundSize:motif==="dots"?"28px 28px":motif==="circuit"?"54px 54px,54px 54px,108px 108px":motif==="grid"?"66px 66px":"auto"};
+};
+
 const Icon:React.FC<{name:string;color:string}>=({name})=>{
   const file=iconFiles[name]??"shapes";
   return <Img src={staticFile("icons/"+file+".svg")} style={{width:"100%",height:"100%",objectFit:"contain"}}/>;
@@ -56,14 +71,14 @@ const SceneCard:React.FC<{scene:Scene;index:number;color:string}>=({scene,index,
   const translate=(1-enter)*42;
   const captionOpacity=frame<scene.audioDurationFrames?1:0;
   return <div style={{width:"100%",height:"100%",position:"relative",overflow:"hidden",
-    background:"radial-gradient(ellipse at 50% 25%, #14243b 0%, #090e19 48%, #05070d 100%)",
+    background:scene.visual.background,
     color:"#F4F7FC",fontFamily:"'Noto Sans Arabic', sans-serif",display:"flex",flexDirection:"column",
     alignItems:"center",justifyContent:landscape?"center":"space-between",
     padding:landscape?"7% 10%":"10% 8%",boxSizing:"border-box",direction:"rtl"}}>
-    <Img src={staticFile("icons/hexagon.svg")} style={{position:"absolute",width:"34%",height:"34%",right:"-8%",top:"17%",opacity:0.08}}/>
-    <Img src={staticFile("icons/orbit.svg")} style={{position:"absolute",width:"30%",height:"30%",left:"-8%",bottom:"18%",opacity:0.07}}/>
-    <div style={{position:"absolute",inset:0,opacity:0.15,backgroundImage:"linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px)",backgroundSize:"72px 72px"}}/>
-    <div style={{position:"absolute",width:"70%",height:"32%",top:"-12%",left:"15%",borderRadius:"50%",background:color,filter:"blur(120px)",opacity:0.2}}/>
+    <div style={motifStyle(scene.visual.motif,color)}/>
+    <Img src={staticFile("icons/hexagon.svg")} style={{position:"absolute",width:"34%",height:"34%",right:"-8%",top:"17%",opacity:0.07,filter:"drop-shadow(0 0 18px "+color+")"}}/>
+    <Img src={staticFile("icons/orbit.svg")} style={{position:"absolute",width:"30%",height:"30%",left:"-8%",bottom:"18%",opacity:0.06}}/>
+    <div style={{position:"absolute",width:"72%",height:"38%",top:"-14%",left:"14%",borderRadius:"50%",background:color,filter:"blur(130px)",opacity:0.22}}/>
     <div style={{zIndex:1,width:"100%",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
       <div style={{fontSize:landscape?25:30,fontWeight:800}}>أبو محمد تك</div>
       <div dir="ltr" style={{fontSize:landscape?20:24,color:"#9CAEC4"}}>{sceneNumbers[index]} / ٠٥</div>
@@ -98,7 +113,7 @@ export const DemoVideo:React.FC<DemoProps>=({scenes,audio})=>{
     {scenes.map((scene,index)=>{
       const start=from; from+=scene.durationInFrames;
       return <Sequence key={scene.id} from={start} durationInFrames={scene.durationInFrames}>
-        <SceneCard scene={scene} index={index} color={palette[index%palette.length]}/>
+        <SceneCard scene={scene} index={index} color={scene.visual.accent}/>
       </Sequence>;
     })}
   </div>;
