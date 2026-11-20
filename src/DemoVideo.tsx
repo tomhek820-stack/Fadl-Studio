@@ -5,28 +5,22 @@ import "@fontsource/noto-sans-arabic/600.css";
 import "@fontsource/noto-sans-arabic/800.css";
 
 type WordTiming = {text:string; startFrame:number; endFrame:number};
+type VisualElement = {label:string; icon:string; image?:string; detail?:string};
 type Scene = {
   id:string; eyebrow:string; title:string; body:string; narration:string;
-  caption:string; icon:string; visual:{background:string;accent:string;motif:string}; durationInFrames:number;
-  audioDurationFrames:number; wordTimings:WordTiming[];
+  caption:string; icon:string;
+  visual:{background:string;accent:string;motif:string;subject:VisualElement;elements?:VisualElement[]};
+  durationInFrames:number; audioDurationFrames:number; wordTimings:WordTiming[];
 };
 export type DemoProps = {title:string; audio:string; scenes:Scene[]};
 const sceneNumbers=["٠١","٠٢","٠٣","٠٤","٠٥"];
 
 const iconFiles:Record<string,string>={
-  shield:"shield-check",
-  "refresh-cw":"refresh-cw",
-  sliders:"sliders-horizontal",
-  lock:"lock-keyhole",
-  cloud:"cloud-upload",
-  spark:"sparkles",
-  script:"file-text",
-  audio:"audio-lines",
-  captions:"captions",
-  export:"upload",
-  "hard-drive":"hard-drive",
-  "app-window":"app-window",
-  "trash-2":"trash-2",
+  shield:"shield-check","refresh-cw":"refresh-cw",sliders:"sliders-horizontal",lock:"lock-keyhole",
+  cloud:"cloud-upload",spark:"sparkles",script:"file-text",audio:"audio-lines",captions:"captions",
+  export:"upload","hard-drive":"hard-drive","app-window":"app-window","trash-2":"trash-2",
+  camera:"camera",mic:"mic",map:"map-pin",settings:"settings-2",smartphone:"smartphone",
+  flashlight:"flashlight","contact-round":"contact-round",shieldCheck:"shield-check",
 };
 const motifStyle=(motif:string,color:string):React.CSSProperties=>{
   const soft=color+"24";
@@ -41,21 +35,39 @@ const motifStyle=(motif:string,color:string):React.CSSProperties=>{
     backgroundSize:motif==="dots"?"28px 28px":motif==="circuit"?"54px 54px,54px 54px,108px 108px":motif==="grid"?"66px 66px":"auto"};
 };
 
-const Icon:React.FC<{name:string;color:string}>=({name})=>{
-  const file=iconFiles[name]??"shapes";
+const Icon:React.FC<{name:string}>=({name})=>{
+  const file=iconFiles[name]??name;
   return <Img src={staticFile("icons/"+file+".svg")} style={{width:"100%",height:"100%",objectFit:"contain"}}/>;
+};
+
+const VisualSubject:React.FC<{item:VisualElement;color:string;compact?:boolean}>=({item,color,compact=false})=>{
+  const size=compact?52:150;
+  return <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:compact?12:20,
+    flexDirection:compact?"row":"column",padding:compact?"10px 16px":"20px 28px",minWidth:compact?150:220,
+    borderRadius:compact?18:30,background:"linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,255,255,.035))",
+    border:"1px solid "+color+"88",boxShadow:"0 12px 45px "+color+"22",backdropFilter:"blur(12px)"}}>
+    <div style={{width:size,height:size,flexShrink:0,padding:compact?8:18,boxSizing:"border-box",
+      borderRadius:compact?14:26,background:color+"18",border:"1px solid "+color+"55"}}>
+      {item.image
+        ? <Img src={staticFile(item.image)} style={{width:"100%",height:"100%",objectFit:"contain"}}/>
+        : <Icon name={item.icon}/>}
+    </div>
+    <div dir="rtl" style={{textAlign:compact?"right":"center",maxWidth:compact?180:360}}>
+      <div style={{fontSize:compact?23:34,fontWeight:800,color:"#FFFFFF"}}>{item.label}</div>
+      {item.detail&&<div style={{fontSize:compact?16:22,lineHeight:1.5,color:"#C5D0DF",marginTop:6}}>{item.detail}</div>}
+    </div>
+  </div>;
 };
 
 const WordCaptions:React.FC<{scene:Scene;frame:number;landscape:boolean;color:string}>=({scene,frame,landscape,color})=>{
   const active=scene.wordTimings.findIndex(w=>frame>=w.startFrame&&frame<w.endFrame);
-  return <div dir="rtl" style={{display:"flex",flexDirection:"row-reverse",flexWrap:"wrap",justifyContent:"center",
-    alignItems:"center",columnGap:landscape?12:16,rowGap:landscape?9:12}}>
+  return <div dir="rtl" style={{display:"flex",flexDirection:"row-reverse",flexWrap:"wrap",justifyContent:"center",alignItems:"center",
+    columnGap:landscape?12:16,rowGap:landscape?9:12}}>
     {scene.wordTimings.map((word,index)=>{
       const highlighted=index===active;
       return <span key={index} dir="rtl" style={{fontSize:landscape?27:37,lineHeight:1.7,fontWeight:800,
         color:highlighted?"#07111D":"#F4F7FC",background:highlighted?color:"transparent",opacity:index<=active?1:0,
-        borderRadius:9,padding:highlighted?"0px 8px":"0px 2px",
-        textShadow:highlighted?"none":"0 2px 10px #0008",transition:"none"}}>
+        borderRadius:9,padding:highlighted?"0px 8px":"0px 2px",textShadow:highlighted?"none":"0 2px 10px #0008",transition:"none"}}>
         {word.text}
       </span>;
     })}
@@ -70,11 +82,11 @@ const SceneCard:React.FC<{scene:Scene;index:number;color:string}>=({scene,index,
   const scale=0.92+enter*0.08;
   const translate=(1-enter)*42;
   const captionOpacity=frame<scene.audioDurationFrames?1:0;
-  return <div style={{width:"100%",height:"100%",position:"relative",overflow:"hidden",
-    background:scene.visual.background,
+  const elements=scene.visual.elements??[];
+  return <div style={{width:"100%",height:"100%",position:"relative",overflow:"hidden",background:scene.visual.background,
     color:"#F4F7FC",fontFamily:"'Noto Sans Arabic', sans-serif",display:"flex",flexDirection:"column",
-    alignItems:"center",justifyContent:landscape?"center":"space-between",
-    padding:landscape?"7% 10%":"10% 8%",boxSizing:"border-box",direction:"rtl"}}>
+    alignItems:"center",justifyContent:landscape?"center":"space-between",padding:landscape?"7% 10%":"10% 8%",
+    boxSizing:"border-box",direction:"rtl"}}>
     <div style={motifStyle(scene.visual.motif,color)}/>
     <Img src={staticFile("icons/hexagon.svg")} style={{position:"absolute",width:"34%",height:"34%",right:"-8%",top:"17%",opacity:0.07,filter:"drop-shadow(0 0 18px "+color+")"}}/>
     <Img src={staticFile("icons/orbit.svg")} style={{position:"absolute",width:"30%",height:"30%",left:"-8%",bottom:"18%",opacity:0.06}}/>
@@ -84,19 +96,17 @@ const SceneCard:React.FC<{scene:Scene;index:number;color:string}>=({scene,index,
       <div dir="ltr" style={{fontSize:landscape?20:24,color:"#9CAEC4"}}>{sceneNumbers[index]} / ٠٥</div>
     </div>
     <div style={{zIndex:1,width:"100%",display:"flex",flex:1,flexDirection:"column",alignItems:"center",
-      justifyContent:"center",gap:landscape?26:48,transform:"translateY("+translate+"px) scale("+scale+")",opacity:enter}}>
-      <div style={{width:landscape?130:190,height:landscape?130:190,padding:28,borderRadius:42,
-        boxSizing:"border-box",background:"rgba(255,255,255,.055)",border:"2px solid "+color+"66",
-        boxShadow:"0 0 70px "+color+"22"}}><Icon name={scene.icon} color={color}/></div>
+      justifyContent:"center",gap:landscape?18:24,transform:"translateY("+translate+"px) scale("+scale+")",opacity:enter}}>
+      <VisualSubject item={scene.visual.subject} color={color}/>
+      {elements.length>0&&<div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:12,maxWidth:"100%"}}>
+        {elements.slice(0,3).map((item,i)=><VisualSubject key={item.label+"-"+i} item={item} color={color} compact/>)}
+      </div>}
       <div dir="rtl" style={{fontSize:landscape?25:34,color,fontWeight:600,textAlign:"center"}}>{scene.eyebrow}</div>
-      <div dir="rtl" style={{fontSize:landscape?64:76,fontWeight:800,lineHeight:1.35,textAlign:"center",
-        maxWidth:"92%",textShadow:"0 8px 35px #0008"}}>{scene.title}</div>
-      <div dir="rtl" style={{fontSize:landscape?30:38,lineHeight:1.8,color:"#C5D0DF",
-        textAlign:"center",maxWidth:"85%"}}>{scene.body}</div>
+      <div dir="rtl" style={{fontSize:landscape?64:76,fontWeight:800,lineHeight:1.35,textAlign:"center",maxWidth:"92%",textShadow:"0 8px 35px #0008"}}>{scene.title}</div>
+      <div dir="rtl" style={{fontSize:landscape?30:38,lineHeight:1.8,color:"#C5D0DF",textAlign:"center",maxWidth:"85%"}}>{scene.body}</div>
     </div>
-    <div style={{zIndex:2,width:"100%",minHeight:landscape?105:155,borderRadius:26,
-      padding:landscape?"18px 28px":"24px 30px",background:"rgba(5,10,18,.91)",
-      border:"1px solid rgba(255,255,255,.16)",boxSizing:"border-box",textAlign:"center",
+    <div style={{zIndex:2,width:"100%",minHeight:landscape?105:155,borderRadius:26,padding:landscape?"18px 28px":"24px 30px",
+      background:"rgba(5,10,18,.91)",border:"1px solid rgba(255,255,255,.16)",boxSizing:"border-box",textAlign:"center",
       display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(12px)",opacity:captionOpacity}}>
       <WordCaptions scene={scene} frame={frame} landscape={landscape} color={color}/>
     </div>
