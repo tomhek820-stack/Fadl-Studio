@@ -79,7 +79,8 @@ class DemoScriptTests(unittest.TestCase):
 
     def test_social_hook_and_follow_call(self):
         combined=" ".join(s["narration"] for s in self.data["scenes"])
-        self.assertIn("هَلْ تَعْرِفُ مَنْ",combined)
+        first=self.data["scenes"][0]["narration"]
+        self.assertIn("؟",first,"The opening must be a clear question or curiosity hook")
         self.assertIn("أَبُو مُحَمَّد تِكْ",combined)
         self.assertNotRegex(combined,r"أَبُو مُحَمَّد[.،؛…]+\s*تِكْ")
         self.assertNotRegex(combined,r"أَبُو مُحَمَّد\s{2,}تِكْ")
