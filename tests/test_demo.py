@@ -24,7 +24,7 @@ class DemoScriptTests(unittest.TestCase):
         ids=[s["id"] for s in self.data["scenes"]]
         self.assertEqual(len(ids),len(set(ids)))
     def test_scene_fields_are_present(self):
-        required={"id","eyebrow","title","body","narration","caption","icon"}
+        required={"id","eyebrow","title","body","narration","caption","icon","visual"}
         for scene in self.data["scenes"]:
             self.assertTrue(required.issubset(scene),scene["id"])
     def test_visible_copy_and_captions_are_arabic(self):
@@ -49,6 +49,17 @@ class DemoScriptTests(unittest.TestCase):
         self.assertTrue((ROOT/"pronunciation.md").is_file())
     def test_no_artificial_speedup(self):
         self.assertEqual(self.data["speechSpeed"],1.0)
+    def test_each_scene_has_unique_art_direction(self):
+        self.assertTrue(self.data.get("visualIdentity"))
+        scenes=self.data["scenes"]
+        self.assertEqual(len({s["icon"] for s in scenes}),len(scenes))
+        signatures={(s["visual"]["background"],s["visual"]["accent"],s["visual"]["motif"]) for s in scenes}
+        self.assertEqual(len(signatures),len(scenes))
+        allowed={"grid","dots","diagonal","rings","circuit"}
+        for scene in scenes:
+            visual=scene["visual"]
+            self.assertIn(visual["motif"],allowed)
+            self.assertRegex(visual["accent"],r"^#[0-9A-Fa-f]{6}$")
     def test_social_hook_and_follow_call(self):
         combined=" ".join(s["narration"] for s in self.data["scenes"])
         self.assertIn("هَلْ يُصْبِحُ هَاتِفُكَ",combined)
