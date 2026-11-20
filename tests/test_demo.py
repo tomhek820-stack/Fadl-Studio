@@ -75,7 +75,7 @@ class DemoScriptTests(unittest.TestCase):
                 self.assertTrue(item.get("icon"))
         self.assertIn("VisualSubject",engine)
         self.assertIn("scene_icons()",downloader)
-        self.assertIn('visual.subject',downloader)
+        self.assertIn('visual.get("subject")',downloader)
 
     def test_social_hook_and_follow_call(self):
         combined=" ".join(s["narration"] for s in self.data["scenes"])
