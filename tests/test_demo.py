@@ -63,8 +63,10 @@ class DemoScriptTests(unittest.TestCase):
             self.assertRegex(visual["accent"],r"^#[0-9A-Fa-f]{6}$")
     def test_social_hook_and_follow_call(self):
         combined=" ".join(s["narration"] for s in self.data["scenes"])
-        self.assertIn("هَلْ يُصْبِحُ هَاتِفُكَ",combined)
-        self.assertIn("أَبُو مُحَمَّد تِك",combined)
+        self.assertIn("هَلْ تَعْرِفُ مَنْ",combined)
+        self.assertIn("أَبُو مُحَمَّدْ. تِكْ",combined)
+        self.assertRegex(combined,r"أَبُو مُحَمَّدْ[.،؛…]+\\s*تِكْ[.،؛!?؟]")
+        self.assertNotIn("خَمْسُ عَادَاتٍ لِهَاتِفٍ أَسْرَعَ",combined)
     def test_edge_retry_and_fallback_are_documented_in_engine(self):
         engine=(ROOT/"scripts/generate_demo.py").read_text(encoding="utf-8")
         self.assertIn("EDGE_RETRIES",engine)
