@@ -17,7 +17,10 @@ def validate_source():
         raise RuntimeError("Expected exactly five scenes")
     if source.get("speechSpeed") != 1:
         raise RuntimeError("Speech speed must remain 1.0; artificial speed-up is forbidden")
-    required={"id","eyebrow","title","body","narration","caption","icon"}
+    if not source.get("visualIdentity"):
+        raise RuntimeError("Every video must declare a distinct visualIdentity")
+    required={"id","eyebrow","title","body","narration","caption","icon","visual"}
+    visual_signatures=[]
     for index,scene in enumerate(scenes,1):
         missing=required-set(scene)
         if missing:
@@ -26,7 +29,19 @@ def validate_source():
             raise RuntimeError(f"Scene {index} narration/caption mismatch or empty narration")
         if len(scene["narration"]) > 180:
             raise RuntimeError(f"Scene {index} narration exceeds 180 characters")
-    print("Source preflight passed: five scenes, matching captions, normal speech speed.")
+        visual=scene["visual"]
+        if not all(visual.get(key) for key in ("background","accent","motif")):
+            raise RuntimeError(f"Scene {index} is missing its visual direction")
+        if visual["motif"] not in {"grid","dots","diagonal","rings","circuit"}:
+            raise RuntimeError(f"Scene {index} has an unsupported visual motif")
+        if not __import__("re").fullmatch(r"#[0-9A-Fa-f]{6}",visual["accent"]):
+            raise RuntimeError(f"Scene {index} accent must be a six-digit hex color")
+        visual_signatures.append((visual["background"],visual["accent"],visual["motif"],scene["icon"]))
+    if len(set(visual_signatures)) != len(scenes):
+        raise RuntimeError("Every scene must have a distinct background, accent, motif and icon combination")
+    if len({s["icon"] for s in scenes}) != len(scenes):
+        raise RuntimeError("Scene icons must be unique within a video")
+    print("Source preflight passed: five scenes, matching captions, normal speech speed, unique scene art direction.")
 
 def main():
     validate_source()
