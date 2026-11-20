@@ -37,8 +37,12 @@ def validate_source():
         if not __import__("re").fullmatch(r"#[0-9A-Fa-f]{6}",visual["accent"]):
             raise RuntimeError(f"Scene {index} accent must be a six-digit hex color")
         visual_signatures.append((visual["background"],visual["accent"],visual["motif"],scene["icon"]))
-    if len(set(visual_signatures)) != len(scenes):
-        raise RuntimeError("Every scene must have a distinct background, accent, motif and icon combination")
+    if len({s["visual"]["background"] for s in scenes}) != len(scenes):
+        raise RuntimeError("Every scene must use a different background")
+    if len({s["visual"]["accent"] for s in scenes}) != len(scenes):
+        raise RuntimeError("Every scene must use a different accent color")
+    if len({s["visual"]["motif"] for s in scenes}) != len(scenes):
+        raise RuntimeError("Every scene must use a different visual motif")
     if len({s["icon"] for s in scenes}) != len(scenes):
         raise RuntimeError("Scene icons must be unique within a video")
     print("Source preflight passed: five scenes, matching captions, normal speech speed, unique scene art direction.")
