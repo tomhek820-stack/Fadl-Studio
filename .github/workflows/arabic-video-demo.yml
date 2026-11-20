@@ -40,6 +40,8 @@ jobs:
         env:
           EDGE_TTS_VOICE: ar-SA-HamedNeural
         run: python3 scripts/build_demo.py
+      - name: Verify final MP4s and quality report
+        run: python3 scripts/verify_outputs.py
       - name: Upload MP4s and quality report
         uses: actions/upload-artifact@v4
         with:
