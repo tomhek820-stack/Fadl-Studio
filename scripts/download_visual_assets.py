@@ -17,8 +17,10 @@ BASE_ASSETS = {"shield-check","refresh-cw","sliders-horizontal","lock-keyhole","
 def scene_icons() -> set[str]:
     data=json.loads((ROOT/"demo/scenes.json").read_text(encoding="utf-8"))
     found=set()
+    aliases = {"sliders": "sliders-horizontal"}
     for scene in data.get("scenes",[]):
-        found.add(scene.get("icon","shapes"))
+        scene_icon = scene.get("icon","shapes")
+        found.add(aliases.get(scene_icon, scene_icon))
         visual=scene.get("visual",{})
         for item in [visual.get("subject",{}),*visual.get("elements",[])]:
             if item and item.get("icon"):
