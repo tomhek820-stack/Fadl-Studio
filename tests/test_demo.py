@@ -61,6 +61,22 @@ class DemoScriptTests(unittest.TestCase):
             visual=scene["visual"]
             self.assertIn(visual["motif"],allowed)
             self.assertRegex(visual["accent"],r"^#[0-9A-Fa-f]{6}$")
+    def test_every_scene_has_a_semantic_visual_subject(self):
+        engine=(ROOT/"src/DemoVideo.tsx").read_text(encoding="utf-8")
+        downloader=(ROOT/"scripts/download_visual_assets.py").read_text(encoding="utf-8")
+        for scene in self.data["scenes"]:
+            subject=scene["visual"].get("subject")
+            self.assertIsInstance(subject,dict,scene["id"])
+            self.assertTrue(subject.get("label"),scene["id"]+" has no subject label")
+            self.assertTrue(subject.get("icon"),scene["id"]+" has no subject icon")
+            self.assertLessEqual(len(scene["visual"].get("elements",[])),3)
+            for item in [subject,*scene["visual"].get("elements",[])]:
+                self.assertTrue(item.get("label"))
+                self.assertTrue(item.get("icon"))
+        self.assertIn("VisualSubject",engine)
+        self.assertIn("scene_icons()",downloader)
+        self.assertIn('visual.subject',downloader)
+
     def test_social_hook_and_follow_call(self):
         combined=" ".join(s["narration"] for s in self.data["scenes"])
         self.assertIn("هَلْ تَعْرِفُ مَنْ",combined)
