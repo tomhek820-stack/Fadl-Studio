@@ -73,12 +73,15 @@ def commons_candidates(query: str) -> list[dict]:
         info=(page.get("imageinfo") or [{}])[0]
         meta=info.get("extmetadata") or {}
         license_name=re.sub(r"<[^>]+>","",meta.get("LicenseShortName",{}).get("value","")).strip()
-        if not re.search(r"CC0|Public domain|CC BY(?:-SA)?(?:\s|$)",license_name,re.I):
+        usage_terms=re.sub(r"<[^>]+>","",meta.get("UsageTerms",{}).get("value","")).strip()
+        license_text=license_name or usage_terms
+        if not re.search(r"CC0|Public domain|Creative Commons Attribution|CC BY(?:-SA)?(?:\s|$)",license_text,re.I):
             continue
         url=info.get("thumburl") or info.get("url")
         if not url or not url.startswith("https://upload.wikimedia.org/"):
             continue
-        results.append({"title":page.get("title",""),"url":url,"license":license_name,
+        results.append({"title":page.get("title",""),"url":url,"license":license_text,
+            "source_page":info.get("descriptionurl",""),
             "artist":re.sub(r"<[^>]+>","",meta.get("Artist",{}).get("value","")).strip(),
             "credit":re.sub(r"<[^>]+>","",meta.get("Credit",{}).get("value","")).strip()})
     return results
@@ -96,7 +99,24 @@ def download_scene_photos() -> None:
         if not isinstance(query,str) or len(query.strip())<8:
             raise RuntimeError(f"Missing meaningful photoQuery for {scene_id}")
         last_error=None
-        for candidate in commons_candidates(query):
+        fallback_queries = {
+            "scene-01":["young man window","person sitting by window","man looking out window"],
+            "scene-02":["calendar clock","calendar pages","clock time passing"],
+            "scene-03":["man mirror reflection","person looking in mirror","mirror reflection"],
+            "scene-04":["student studying desk","person working laptop desk","study desk notebook"],
+            "scene-05":["hiker mountain sunrise","mountain summit hiker","mountain sunrise landscape"],
+        }
+        candidates=[]
+        for search_query in [query, *fallback_queries.get(scene_id, [])]:
+            try:
+                found=commons_candidates(search_query)
+                candidates.extend(found)
+                if found:
+                    break
+            except Exception as exc:
+                last_error=exc
+                print(f"Commons query failed for {scene_id} ({search_query}): {exc}",flush=True)
+        for candidate in candidates:
             try:
                 request=urllib.request.Request(candidate["url"],headers={"User-Agent":"AbuMohammedTechVideo/1.0"})
                 with urllib.request.urlopen(request,timeout=60) as response:
