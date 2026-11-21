@@ -32,7 +32,8 @@
             "label": "الحُلْمُ",
             "icon": "cloud-sun"
           }
-        ]
+        ],
+        "photoQuery": "lonely young man sitting beside apartment window at night cinematic photograph"
       }
     },
     {
@@ -61,7 +62,8 @@
             "label": "الأَيَّامُ",
             "icon": "calendar"
           }
-        ]
+        ],
+        "photoQuery": "calendar pages desk clock passage of time still life photography"
       }
     },
     {
@@ -90,7 +92,8 @@
             "label": "القَرَارُ",
             "icon": "brain"
           }
-        ]
+        ],
+        "photoQuery": "man facing his reflection in mirror dimly lit room photography"
       }
     },
     {
@@ -119,7 +122,8 @@
             "label": "التَّعَلُّمُ",
             "icon": "book-open"
           }
-        ]
+        ],
+        "photoQuery": "young adult studying and working at desk notebook laptop determined photography"
       }
     },
     {
@@ -148,7 +152,8 @@
             "label": "الطَّرِيقُ",
             "icon": "route"
           }
-        ]
+        ],
+        "photoQuery": "hiker standing on mountain summit at sunrise wide cinematic landscape"
       }
     }
   ]
