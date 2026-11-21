@@ -57,7 +57,7 @@ def fetch(name: str) -> None:
 
 
 def image_bytes_ok(data: bytes) -> bool:
-    return (data.startswith(b"\\xff\\xd8\\xff") or data.startswith(b"\\x89PNG\\r\\n\\x1a\\n")
+    return (data.startswith(b"\xff\xd8\xff") or data.startswith(b"\x89PNG\r\n\x1a\n")
             or (data[:4] == b"RIFF" and data[8:12] == b"WEBP"))
 
 def commons_candidates(query: str) -> list[dict]:
@@ -73,7 +73,7 @@ def commons_candidates(query: str) -> list[dict]:
         info=(page.get("imageinfo") or [{}])[0]
         meta=info.get("extmetadata") or {}
         license_name=re.sub(r"<[^>]+>","",meta.get("LicenseShortName",{}).get("value","")).strip()
-        if not re.search(r"CC0|Public domain|CC BY(?:-SA)?(?:\\s|$)",license_name,re.I):
+        if not re.search(r"CC0|Public domain|CC BY(?:-SA)?(?:\s|$)",license_name,re.I):
             continue
         url=info.get("thumburl") or info.get("url")
         if not url or not url.startswith("https://upload.wikimedia.org/"):
