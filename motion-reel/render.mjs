@@ -21,10 +21,12 @@ try{
  page.on("pageerror",e=>console.error("PAGEERROR",e.stack||e.message));
  await page.goto("http://127.0.0.1:4173/",{waitUntil:"networkidle0"});
  await page.evaluate(()=>document.fonts.ready);
+ await page.addStyleTag({content:"html,body{width:1080px!important;height:1920px!important;min-height:1920px!important;margin:0!important;padding:0!important;overflow:hidden!important;display:block!important;background:#F2EFE9!important}.app{width:1080px!important;max-width:none!important;display:block!important}.screen{width:1080px!important;height:1920px!important;max-width:none!important;margin:0!important;border-radius:0!important;box-shadow:none!important}.screen canvas{width:1080px!important;height:1920px!important}.controls{display:none!important}"});
  await page.waitForFunction(()=>typeof window.setTime==="function",{timeout:15000});
  for(let f=0;f<1200;f++){
   await page.evaluate(n=>window.setTime(n/30),f);
-  await (await page.$("#stage")).screenshot({path:path.join(frames,String(f).padStart(5,"0")+".png")});
+  const shot=await (await page.$("#stage")).screenshot({path:path.join(frames,String(f).padStart(5,"0")+".png")});
+  if(f===0 && (shot.length<10000)) throw Error("Unexpectedly small 1080x1920 frame");
   if(f%100===0)console.log("Rendered",f,"/1199");
  }
 }finally{await browser.close();await new Promise(ok=>server.close(ok))}
