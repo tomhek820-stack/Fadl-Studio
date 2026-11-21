@@ -77,6 +77,20 @@ class DemoScriptTests(unittest.TestCase):
         self.assertIn("scene_icons()",downloader)
         self.assertIn('visual.get("subject",{})',downloader)
 
+
+    def test_every_scene_has_distinct_photo_queries_and_camera_motion(self):
+        scenes=self.data["scenes"]
+        queries=[s["visual"].get("photoQuery","").strip() for s in scenes]
+        self.assertEqual(len(queries),5)
+        self.assertTrue(all(len(q)>=8 for q in queries))
+        self.assertEqual(len(set(queries)),5)
+        engine=(ROOT/"src/DemoVideo.tsx").read_text(encoding="utf-8")
+        downloader=(ROOT/"scripts/download_visual_assets.py").read_text(encoding="utf-8")
+        self.assertIn("photoScale",engine)
+        self.assertIn("photoX",engine)
+        self.assertIn("download_scene_photos",downloader)
+        self.assertIn("commons.wikimedia.org",downloader)
+
     def test_social_hook_and_follow_call(self):
         combined=" ".join(s["narration"] for s in self.data["scenes"])
         first=self.data["scenes"][0]["narration"]
