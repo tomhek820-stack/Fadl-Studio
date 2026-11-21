@@ -9,7 +9,7 @@ type VisualElement = {label:string; icon:string; image?:string; detail?:string};
 type Scene = {
   id:string; eyebrow:string; title:string; body:string; narration:string;
   caption:string; icon:string;
-  visual:{background:string;accent:string;motif:string;subject:VisualElement;elements?:VisualElement[]};
+  visual:{background:string;accent:string;motif:string;photo?:string;photoQuery?:string;subject:VisualElement;elements?:VisualElement[]};
   durationInFrames:number; audioDurationFrames:number; wordTimings:WordTiming[];
 };
 export type DemoProps = {title:string; audio:string; scenes:Scene[]};
@@ -44,7 +44,7 @@ const VisualSubject:React.FC<{item:VisualElement;color:string;compact?:boolean}>
   const size=compact?52:150;
   return <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:compact?12:20,
     flexDirection:compact?"row":"column",padding:compact?"10px 16px":"20px 28px",minWidth:compact?150:220,
-    borderRadius:compact?18:30,background:"linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,255,255,.035))",
+    borderRadius:compact?18:30,background:"linear-gradient(145deg,rgba(7,12,22,.82),rgba(7,12,22,.58))",
     border:"1px solid "+color+"88",boxShadow:"0 12px 45px "+color+"22",backdropFilter:"blur(12px)"}}>
     <div style={{width:size,height:size,flexShrink:0,padding:compact?8:18,boxSizing:"border-box",
       borderRadius:compact?14:26,background:color+"18",border:"1px solid "+color+"55"}}>
@@ -82,11 +82,17 @@ const SceneCard:React.FC<{scene:Scene;index:number;color:string}>=({scene,index,
   const scale=0.92+enter*0.08;
   const translate=(1-enter)*42;
   const captionOpacity=frame<scene.audioDurationFrames?1:0;
+  const progress=Math.min(1,frame/Math.max(1,scene.durationInFrames-1));
+  const photoScale=1.04+progress*0.16;
+  const photoX=(index%2===0?-1:1)*progress*1.8;
+  const photoY=(index%2===0?1:-1)*progress*1.2;
   const elements=scene.visual.elements??[];
   return <div style={{width:"100%",height:"100%",position:"relative",overflow:"hidden",background:scene.visual.background,
     color:"#F4F7FC",fontFamily:"'Noto Sans Arabic', sans-serif",display:"flex",flexDirection:"column",
     alignItems:"center",justifyContent:landscape?"center":"space-between",padding:landscape?"7% 10%":"10% 8%",
     boxSizing:"border-box",direction:"rtl"}}>
+    {scene.visual.photo&&<Img src={staticFile(scene.visual.photo)} style={{position:"absolute",inset:"-7%",width:"114%",height:"114%",objectFit:"cover",transform:`scale(${photoScale}) translate(${photoX}%,${photoY}%)`,filter:"saturate(.88) contrast(1.06)",opacity:.54}}/>}
+    <div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,rgba(3,7,14,.58),rgba(3,7,14,.36) 42%,rgba(3,7,14,.88))"}}/>
     <div style={motifStyle(scene.visual.motif,color)}/>
     <Img src={staticFile("icons/hexagon.svg")} style={{position:"absolute",width:"34%",height:"34%",right:"-8%",top:"17%",opacity:0.07,filter:"drop-shadow(0 0 18px "+color+")"}}/>
     <Img src={staticFile("icons/orbit.svg")} style={{position:"absolute",width:"30%",height:"30%",left:"-8%",bottom:"18%",opacity:0.06}}/>
