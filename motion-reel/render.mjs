@@ -24,7 +24,7 @@ try{
  await page.waitForFunction(()=>typeof window.setTime==="function",{timeout:15000});
  for(let f=0;f<1200;f++){
   await page.evaluate(n=>window.setTime(n/30),f);
-  await page.locator("#stage").screenshot({path:path.join(frames,String(f).padStart(5,"0")+".png")});
+  await (await page.$("#stage")).screenshot({path:path.join(frames,String(f).padStart(5,"0")+".png")});
   if(f%100===0)console.log("Rendered",f,"/1199");
  }
 }finally{await browser.close();await new Promise(ok=>server.close(ok))}
