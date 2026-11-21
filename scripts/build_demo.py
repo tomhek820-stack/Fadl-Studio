@@ -86,7 +86,7 @@ def main():
     run([sys.executable,"scripts/download_visual_assets.py"])
     source=json.loads((ROOT/"demo/scenes.json").read_text(encoding="utf-8"))
     for scene in source["scenes"]:
-        photo=ROOT/"public"/scene["visual"].get("photo","")
+        photo=ROOT/"public"/"photos"/(scene["id"]+".jpg")
         if not photo.is_file() or photo.stat().st_size<20000:
             raise RuntimeError(f"Scene photo missing or too small: {scene['id']}")
     run([sys.executable,"scripts/generate_demo.py"])
