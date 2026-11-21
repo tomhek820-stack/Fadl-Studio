@@ -27,6 +27,12 @@ jobs:
       - name: Install renderer
         working-directory: motion-reel
         run: npm install --no-audit --no-fund
+      - name: Check renderer JavaScript syntax
+        working-directory: motion-reel
+        run: |
+          node --check engine.js
+          node --check render.mjs
+          node --check verify.mjs
       - name: Render 1200 frames
         working-directory: motion-reel
         run: npm run render
