@@ -21,6 +21,7 @@ try{
  page.on("pageerror",e=>console.error("PAGEERROR",e.stack||e.message));
  await page.goto("http://127.0.0.1:4173/",{waitUntil:"networkidle0"});
  await page.evaluate(()=>document.fonts.ready);
+ await page.waitForFunction(()=>window.__MOTION_READY===true,{timeout:15000});
  await page.addStyleTag({content:"html,body{width:1080px!important;height:1920px!important;min-height:1920px!important;margin:0!important;padding:0!important;overflow:hidden!important;display:block!important;background:#F2EFE9!important}.app{width:1080px!important;max-width:none!important;display:block!important}.screen{width:1080px!important;height:1920px!important;max-width:none!important;margin:0!important;border-radius:0!important;box-shadow:none!important}.screen canvas{width:1080px!important;height:1920px!important}.controls{display:none!important}"});
  await page.waitForFunction(()=>typeof window.setTime==="function",{timeout:15000});
  for(let f=0;f<1200;f++){
