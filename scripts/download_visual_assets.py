@@ -13,6 +13,14 @@ DEST = ROOT / "public" / "icons"
 PHOTO_DEST = ROOT / "public" / "photos"
 PHOTO_SOURCES = ROOT / "demo" / "generated" / "photo-sources.json"
 COMMONS_API = "https://commons.wikimedia.org/w/api.php"
+UNSPLASH_BASE = "https://images.unsplash.com/"
+CURATED_PHOTOS = {
+    "scene-01": ("photo-1519608487953-e999c86e7455", "night atmosphere / waiting"),
+    "scene-02": ("photo-1506784983877-45594efa4cbe", "calendar and planning"),
+    "scene-03": ("photo-1500648767791-00dcc994a43e", "man portrait / self reflection"),
+    "scene-04": ("photo-1499750310107-5fef28a66643", "focused desk and work"),
+    "scene-05": ("photo-1500534623283-312aade485b7", "mountain landscape / new beginning"),
+}
 BASE = "https://cdn.jsdelivr.net/npm/lucide-static@0.468.0/icons/"
 BASE_ASSETS = {"shield-check","refresh-cw","sliders-horizontal","lock-keyhole","cloud-upload",
     "sparkles","file-text","audio-lines","captions","upload","shapes","hexagon","orbit",
@@ -98,46 +106,69 @@ def download_scene_photos() -> None:
         query=scene.get("visual",{}).get("photoQuery")
         if not isinstance(query,str) or len(query.strip())<8:
             raise RuntimeError(f"Missing meaningful photoQuery for {scene_id}")
-        last_error=None
-        fallback_queries = {
-            "scene-01":["young man window","person sitting by window","man looking out window"],
-            "scene-02":["calendar clock","calendar pages","clock time passing"],
-            "scene-03":["man mirror reflection","person looking in mirror","mirror reflection"],
-            "scene-04":["student studying desk","person working laptop desk","study desk notebook"],
-            "scene-05":["hiker mountain sunrise","mountain summit hiker","mountain sunrise landscape"],
-        }
-        candidates=[]
-        for search_query in [query, *fallback_queries.get(scene_id, [])]:
-            try:
-                found=commons_candidates(search_query)
-                candidates.extend(found)
-                if found:
+        image_data=None
+        source_record=None
+        photo_id,description=CURATED_PHOTOS[scene_id]
+        url=f"{UNSPLASH_BASE}{photo_id}?auto=format&fit=crop&w=1920&q=85&fm=jpg"
+        try:
+            request=urllib.request.Request(url,headers={"User-Agent":"Abu-Mohammed-Tech-Video/1.0"})
+            with urllib.request.urlopen(request,timeout=60) as response:
+                candidate=response.read()
+            if len(candidate)>=20000 and image_bytes_ok(candidate):
+                image_data=candidate
+                source_record={"title":description,"url":url,"source_page":"https://unsplash.com/license",
+                    "license":"Unsplash License","artist":"Unsplash contributor (see source image page)",
+                    "local":"photos/"+scene_id+".jpg"}
+            else:
+                raise ValueError("Unsplash CDN returned invalid or undersized image")
+        except Exception as exc:
+            print(f"Unsplash CDN unavailable for {scene_id}: {exc}; trying Wikimedia Commons",flush=True)
+        if image_data is None:
+            last_error=None
+            fallback_queries={
+                "scene-01":["young man window","person sitting by window"],
+                "scene-02":["calendar clock","calendar pages"],
+                "scene-03":["man mirror reflection","person looking in mirror"],
+                "scene-04":["student studying desk","person working laptop"],
+                "scene-05":["hiker mountain sunrise","mountain summit hiker"],
+            }
+            candidates=[]
+            for search_query in [query,*fallback_queries.get(scene_id,[])]:
+                try:
+                    candidates.extend(commons_candidates(search_query))
+                    if candidates:
+                        break
+                except Exception as exc:
+                    last_error=exc
+                    print(f"Commons search unavailable for {scene_id}: {exc}",flush=True)
+                    if "429" in str(exc):
+                        break
+            for item in candidates:
+                try:
+                    request=urllib.request.Request(item["url"],headers={"User-Agent":"Abu-Mohammed-Tech-Video/1.0"})
+                    with urllib.request.urlopen(request,timeout=60) as response:
+                        candidate=response.read()
+                    if len(candidate)<20000 or not image_bytes_ok(candidate):
+                        raise ValueError("Invalid or undersized Commons image")
+                    image_data=candidate
+                    item["local"]="photos/"+scene_id+".jpg"
+                    source_record=item
                     break
-            except Exception as exc:
-                last_error=exc
-                print(f"Commons query failed for {scene_id} ({search_query}): {exc}",flush=True)
-        for candidate in candidates:
-            try:
-                request=urllib.request.Request(candidate["url"],headers={"User-Agent":"AbuMohammedTechVideo/1.0"})
-                with urllib.request.urlopen(request,timeout=60) as response:
-                    image=response.read()
-                if len(image)<20000 or not image_bytes_ok(image):
-                    raise ValueError("Invalid or undersized image response")
-                target=PHOTO_DEST/(scene_id+".jpg")
-                target.write_bytes(image)
-                candidate["local"]="photos/"+target.name
-                sources[scene_id]=candidate
-                scene.setdefault("visual",{})["photo"]=candidate["local"]
-                print(f"Photo ready: {scene_id} / {candidate['title']} / {candidate['license']}",flush=True)
-                break
-            except Exception as exc:
-                last_error=exc
-                print(f"Skipping invalid Commons candidate for {scene_id}: {exc}",flush=True)
-        if scene_id not in sources:
-            raise RuntimeError(f"No valid openly licensed photo for {scene_id}; last error: {last_error}")
+                except Exception as exc:
+                    last_error=exc
+                    print(f"Commons image unavailable for {scene_id}: {exc}",flush=True)
+                    if "429" in str(exc):
+                        break
+            if image_data is None:
+                raise RuntimeError(f"No valid photo source for {scene_id}; both free sources failed: {last_error}")
+        target=PHOTO_DEST/(scene_id+".jpg")
+        target.write_bytes(image_data)
+        sources[scene_id]=source_record
+        scene.setdefault("visual",{})["photo"]=source_record["local"]
+        print(f"Photo ready: {scene_id} / {source_record['title']} / {source_record['license']} ({len(image_data)} bytes)",flush=True)
     PHOTO_SOURCES.parent.mkdir(parents=True,exist_ok=True)
     PHOTO_SOURCES.write_text(json.dumps(sources,ensure_ascii=False,indent=2),encoding="utf-8")
-    print("Five unique Wikimedia Commons photos downloaded; attribution metadata saved.")
+    print("Five unique scene photos downloaded; source and license metadata saved.")
 
 def main() -> None:
     DEST.mkdir(parents=True,exist_ok=True)
