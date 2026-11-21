@@ -54,7 +54,11 @@ def validate_source():
         raise RuntimeError("Every scene must use a different visual motif")
     if len({s["icon"] for s in scenes}) != len(scenes):
         raise RuntimeError("Scene icons must be unique within a video")
-    print("Source preflight passed: five scenes, matching captions, normal speech speed, unique scene art direction.")
+    for scene in scenes:
+        query=scene["visual"].get("photoQuery")
+        if not isinstance(query,str) or len(query.strip())<8:
+            raise RuntimeError(f"{scene['id']} must declare a meaningful photoQuery")
+    print("Source preflight passed: five scenes, matching captions, unique art direction and photo queries.")
 
 def validate_visual_item(item, scene_id, kind):
     import re
@@ -80,6 +84,11 @@ def main():
     validate_source()
     OUT.mkdir(parents=True,exist_ok=True)
     run([sys.executable,"scripts/download_visual_assets.py"])
+    source=json.loads((ROOT/"demo/scenes.json").read_text(encoding="utf-8"))
+    for scene in source["scenes"]:
+        photo=ROOT/"public"/scene["visual"].get("photo","")
+        if not photo.is_file() or photo.stat().st_size<20000:
+            raise RuntimeError(f"Scene photo missing or too small: {scene['id']}")
     run([sys.executable,"scripts/generate_demo.py"])
     run(["npm","run","typecheck"])
     run(["npm","test"])
