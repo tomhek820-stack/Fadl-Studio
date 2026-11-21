@@ -1,0 +1,14 @@
+{
+  "name": "fadl-studio-motion-reel",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "render": "node render.mjs",
+    "verify": "node verify.mjs",
+    "build": "npm run render && npm run verify"
+  },
+  "dependencies": {
+    "@fontsource/alexandria": "5.2.6",
+    "puppeteer": "24.15.0"
+  }
+}
