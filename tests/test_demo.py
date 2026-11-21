@@ -90,6 +90,9 @@ class DemoScriptTests(unittest.TestCase):
         self.assertIn("photoX",engine)
         self.assertIn("download_scene_photos",downloader)
         self.assertIn("commons.wikimedia.org",downloader)
+        self.assertIn("images.unsplash.com",downloader)
+        self.assertIn("CURATED_PHOTOS",downloader)
+        self.assertIn("Unsplash License",downloader)
 
     def test_social_hook_and_follow_call(self):
         combined=" ".join(s["narration"] for s in self.data["scenes"])
