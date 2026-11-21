@@ -1,15 +1,58 @@
 # Fadl Studio
 
-Arabic-first video production pipeline built with Remotion, Piper TTS and FFmpeg.
+خط إنتاج عربي لإنشاء فيديوهات قصيرة قابلة للنشر من فكرة أو نص، باستخدام Remotion وMicrosoft Edge Neural TTS (مجاني) مع Piper كخيار احتياطي دون اتصال وFFmpeg.
 
-The repository is being initialized with an editable 30-second Arabic demo. See `AGENTS.md` for engineering and Arabic typography rules once the feature branch is available.
+## المتطلبات
+- Node.js 22 أو أحدث.
+- Python 3.11 أو أحدث.
+- FFmpeg وFFprobe.
+- اتصال إنترنت أثناء البناء لتنزيل الأدوات والنماذج.
+- اتصال إنترنت لتوليد الصوت عبر Edge Neural TTS؛ لا يحتاج مفتاح API أو حسابًا مدفوعًا. يعمل Piper كخيار احتياطي محلي.
 
-## Planned workflow
+## إنشاء فيديو المحتوى الاجتماعي
 
-1. Review and edit the Arabic scene script in `demo/scenes.json`.
-2. Generate per-scene narration locally with Piper using the Arabic Jordanian Kareem medium voice.
-3. Measure each WAV and create synchronized scene/caption metadata.
-4. Render vertical, landscape, square and portrait compositions with Remotion.
-5. Finalize MP4 files with FFmpeg.
+~~~bash
+npm install
+python3 -m pip install edge-tts piper-tts==1.3.0
+python3 scripts/build_demo.py
+~~~
 
-No hosted speech API key is required. The voice model is downloaded on demand and is not committed to Git.
+الملفات الناتجة:
+- demo/output/final_9x16.mp4 — عمودي 1080×1920، مناسب لـ Reels وShorts وTikTok.
+- demo/output/final_16x9.mp4 — أفقي 1920×1080.
+
+## الأيقونات والعناصر البصرية
+- قبل التصيير، ينزّل `scripts/download_visual_assets.py` أيقونات SVG من مكتبة Lucide الرسمية عبر jsDelivr إلى `public/icons/`.
+- تُستخدم أيقونات مناسبة لكل أداة أو فكرة يشرحها المشهد، مع أشكال هندسية زخرفية خفيفة.
+- التنزيل يتضمن إعادة محاولات وفحصًا لصحة ملفات SVG؛ لا يبدأ التصيير بأيقونات ناقصة.
+- راجع `THIRD-PARTY-NOTICES.md` وتراخيص Lucide قبل الاستخدام التجاري.
+
+## الصوت والترجمة كلمة بكلمة
+- حرر النص في demo/scenes.json.
+- يُنتج التعليق الصوتي كله في ملف WAV واحد، فلا يعاد تشغيل محرك الصوت عند كل مشهد ولا تنقطع النبرة عند الانتقال.
+- المحرك الأول: Microsoft Edge Neural TTS المجاني عبر الإنترنت بصوت رجالي عربي ar-SA-HamedNeural، دون API key أو اشتراك.
+- المحرك الثاني: Piper بصوت ar_JO-kareem-medium، يعمل محليًا دون إنترنت عند تعذر Edge TTS.
+- يُنتج كلا المحركين التعليق الصوتي كاملاً في ملف واحد.
+- لا نسرّع الصوت بعد التوليد؛ السرعة الطبيعية 1.0 تحافظ على الوقفات والتنغيم.
+- تظهر الكلمات تدريجيًا وتُميّز الكلمة الحالية. توقيت الكلمات وحدود المشاهد تقديري وليس محاذاة صوتية دقيقة؛ يجب تدقيقه قبل النشر.
+- راجع pronunciation.md للأسماء والمصطلحات.
+
+## المقاسات
+Remotion يتضمن 9:16 و16:9 و1:1 و4:5. مهمة التسليم الحالية تصدر 9:16 و16:9.
+
+## الفحوص
+~~~bash
+npm run typecheck
+npm test
+python3 scripts/build_demo.py
+~~~
+
+GitHub Actions يبني الفيديو ويرفع MP4 وتقرير الجودة كـ Artifact. عند فشل أي مرحلة، افحص سجل الخطأ، أصلح السبب في المصدر أو التبعيات، ثم أعد البناء وتحقق من وجود ملفي MP4 ومسار الصوت قبل إعلان النجاح. لا تعتبر انتهاء الاختبارات وحده نجاحًا للتسليم.
+
+## التراخيص
+راجع THIRD-PARTY-NOTICES.md قبل النشر التجاري. لا يحتاج مسار Piper المحلي إلى مفتاح API. يعتمد Edge TTS على خدمة إنترنت مجانية وقد تتغير إتاحتها أو شروطها؛ Piper يعمل محليًا كخيار احتياطي، لكن جودته الصوتية متوسطة.
+
+
+## نظام التصميم المستقل لكل فيديو
+
+كل فيديو يحدد `visualIdentity` خاصًا به، وكل مشهد يملك خلفية متدرجة ولونًا مميزًا ونمطًا زخرفيًا وأيقونة مرتبطة بالمعلومة. يرفض فحص ما قبل البناء تكرار الخلفيات أو الألوان أو الأنماط أو الأيقونات داخل الفيديو. لا تستخدم قالبًا بصريًا واحدًا لكل الموضوعات؛ اختر هوية مناسبة لطبيعة كل فيديو.
