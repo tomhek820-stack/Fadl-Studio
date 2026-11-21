@@ -104,6 +104,8 @@ def synthesize_piper(text: str, target: Path) -> str:
 def main() -> None:
     data=json.loads(SOURCE.read_text(encoding="utf-8"))
     scenes=data["scenes"]
+    for scene in scenes:
+        scene.setdefault("visual", {})["photo"] = "photos/" + scene["id"] + ".jpg"
     if len(scenes) != 5:
         raise RuntimeError("The current social-video composition requires exactly five scenes")
     narration=" ".join(scene["narration"].strip() for scene in scenes)
